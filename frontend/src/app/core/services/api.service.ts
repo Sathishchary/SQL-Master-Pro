@@ -5,7 +5,10 @@ import { environment } from '../../../environments/environment';
 import {
   ApiResponse, Course, Lesson, Quiz, Question, Challenge,
   Certificate, Payment, Blog, SqlExecutionResponse, SqlExecution,
-  UserProgress, DashboardStats, PageResponse, SubscriptionPlan_
+  UserProgress, DashboardStats, PageResponse, PricingPlanDto,
+  QuizResult, QuizAttempt, ChallengeSubmissionResult, SqlDatabase, PaymentOrder,
+  RazorpayVerifyRequest, PaymentVerifyResult, UpiVerifyRequest,
+  AdminDashboardStats, AdminAnalytics, User
 } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
@@ -38,8 +41,8 @@ export class ApiService {
   getMyProgress(): Observable<ApiResponse<DashboardStats>> {
     return this.http.get<ApiResponse<DashboardStats>>(`${this.base}/progress/my-progress`);
   }
-  getCourseProgress(courseId: number): Observable<ApiResponse<any>> {
-    return this.http.get<ApiResponse<any>>(`${this.base}/progress/course/${courseId}`);
+  getCourseProgress(courseId: number): Observable<ApiResponse<UserProgress[]>> {
+    return this.http.get<ApiResponse<UserProgress[]>>(`${this.base}/progress/course/${courseId}`);
   }
 
   // Quizzes
@@ -53,11 +56,11 @@ export class ApiService {
   getQuizQuestions(quizId: number): Observable<ApiResponse<Question[]>> {
     return this.http.get<ApiResponse<Question[]>>(`${this.base}/quizzes/${quizId}/questions`);
   }
-  submitQuiz(quizId: number, answers: Record<number, string>): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(`${this.base}/quizzes/${quizId}/submit`, answers);
+  submitQuiz(quizId: number, answers: Record<number, string>): Observable<ApiResponse<QuizResult>> {
+    return this.http.post<ApiResponse<QuizResult>>(`${this.base}/quizzes/${quizId}/submit`, answers);
   }
-  getMyQuizAttempts(): Observable<ApiResponse<any[]>> {
-    return this.http.get<ApiResponse<any[]>>(`${this.base}/quizzes/my-attempts`);
+  getMyQuizAttempts(): Observable<ApiResponse<QuizAttempt[]>> {
+    return this.http.get<ApiResponse<QuizAttempt[]>>(`${this.base}/quizzes/my-attempts`);
   }
 
   // Challenges
@@ -68,8 +71,8 @@ export class ApiService {
   getChallenge(id: number): Observable<ApiResponse<Challenge>> {
     return this.http.get<ApiResponse<Challenge>>(`${this.base}/challenges/${id}`);
   }
-  submitChallenge(id: number, query: string): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(`${this.base}/challenges/${id}/submit`, { query });
+  submitChallenge(id: number, query: string): Observable<ApiResponse<ChallengeSubmissionResult>> {
+    return this.http.post<ApiResponse<ChallengeSubmissionResult>>(`${this.base}/challenges/${id}/submit`, { query });
   }
 
   // SQL Playground
@@ -90,8 +93,8 @@ export class ApiService {
   getFavoriteQueries(): Observable<ApiResponse<SqlExecution[]>> {
     return this.http.get<ApiResponse<SqlExecution[]>>(`${this.base}/sql/favorites`);
   }
-  getDatabases(): Observable<ApiResponse<any[]>> {
-    return this.http.get<ApiResponse<any[]>>(`${this.base}/sql/databases`);
+  getDatabases(): Observable<ApiResponse<SqlDatabase[]>> {
+    return this.http.get<ApiResponse<SqlDatabase[]>>(`${this.base}/sql/databases`);
   }
 
   // Certificates
@@ -106,17 +109,17 @@ export class ApiService {
   }
 
   // Payments
-  getPlans(): Observable<ApiResponse<SubscriptionPlan_[]>> {
-    return this.http.get<ApiResponse<SubscriptionPlan_[]>>(`${this.base}/payments/plans`);
+  getPlans(): Observable<ApiResponse<PricingPlanDto[]>> {
+    return this.http.get<ApiResponse<PricingPlanDto[]>>(`${this.base}/payments/plans`);
   }
-  createOrder(plan: string, duration: string, amount: number): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(`${this.base}/payments/create-order`, { plan, duration, amount });
+  createOrder(plan: string, duration: string, amount: number): Observable<ApiResponse<PaymentOrder>> {
+    return this.http.post<ApiResponse<PaymentOrder>>(`${this.base}/payments/create-order`, { plan, duration, amount });
   }
-  verifyPayment(data: any): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(`${this.base}/payments/verify`, data);
+  verifyPayment(data: RazorpayVerifyRequest): Observable<ApiResponse<PaymentVerifyResult>> {
+    return this.http.post<ApiResponse<PaymentVerifyResult>>(`${this.base}/payments/verify`, data);
   }
-  verifyUpiPayment(data: any): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(`${this.base}/payments/verify-upi`, data);
+  verifyUpiPayment(data: UpiVerifyRequest): Observable<ApiResponse<PaymentVerifyResult>> {
+    return this.http.post<ApiResponse<PaymentVerifyResult>>(`${this.base}/payments/verify-upi`, data);
   }
   getPaymentHistory(): Observable<ApiResponse<Payment[]>> {
     return this.http.get<ApiResponse<Payment[]>>(`${this.base}/payments/history`);
@@ -137,19 +140,19 @@ export class ApiService {
   }
 
   // Admin
-  getAdminStats(): Observable<ApiResponse<any>> {
-    return this.http.get<ApiResponse<any>>(`${this.base}/admin/dashboard`);
+  getAdminStats(): Observable<ApiResponse<AdminDashboardStats>> {
+    return this.http.get<ApiResponse<AdminDashboardStats>>(`${this.base}/admin/dashboard`);
   }
-  getAdminUsers(page = 0, size = 20): Observable<ApiResponse<PageResponse<any>>> {
+  getAdminUsers(page = 0, size = 20): Observable<ApiResponse<PageResponse<User>>> {
     const params = new HttpParams().set('page', page).set('size', size);
-    return this.http.get<ApiResponse<PageResponse<any>>>(`${this.base}/admin/users`, { params });
+    return this.http.get<ApiResponse<PageResponse<User>>>(`${this.base}/admin/users`, { params });
   }
   getAdminPayments(page = 0, size = 20): Observable<ApiResponse<PageResponse<Payment>>> {
     const params = new HttpParams().set('page', page).set('size', size);
     return this.http.get<ApiResponse<PageResponse<Payment>>>(`${this.base}/admin/payments`, { params });
   }
-  getAdminAnalytics(): Observable<ApiResponse<any>> {
-    return this.http.get<ApiResponse<any>>(`${this.base}/admin/analytics`);
+  getAdminAnalytics(): Observable<ApiResponse<AdminAnalytics>> {
+    return this.http.get<ApiResponse<AdminAnalytics>>(`${this.base}/admin/analytics`);
   }
   createCourse(data: Partial<Course>): Observable<ApiResponse<Course>> {
     return this.http.post<ApiResponse<Course>>(`${this.base}/admin/courses`, data);

@@ -1,0 +1,112 @@
+<div class="challenges-page">
+  <!-- Hero Header -->
+  <div class="challenges-hero">
+    <div class="hero-content">
+      <div class="hero-badge">900+ Challenges</div>
+      <h1>⚔️ SQL Coding Challenges</h1>
+      <p>Sharpen your SQL skills by solving real-world problems. Practice JOINs, CTEs, window functions, and more.</p>
+      <div class="hero-stats">
+        <div class="h-stat easy"><div class="h-num">100+</div><div class="h-label">Easy</div></div>
+        <div class="h-divider"></div>
+        <div class="h-stat medium"><div class="h-num">300+</div><div class="h-label">Medium</div></div>
+        <div class="h-divider"></div>
+        <div class="h-stat hard"><div class="h-num">500+</div><div class="h-label">Advanced</div></div>
+      </div>
+    </div>
+    <div class="hero-decoration">
+      <div class="code-block">
+<pre><span class="kw">SELECT</span> u.name, <span class="fn">COUNT</span>(s.id) <span class="kw">AS</span> solved
+<span class="kw">FROM</span> users u
+<span class="kw">JOIN</span> submissions s <span class="kw">ON</span> u.id = s.user_id
+<span class="kw">WHERE</span> s.correct = <span class="val">true</span>
+<span class="kw">GROUP BY</span> u.name
+<span class="kw">ORDER BY</span> solved <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="val">10</span>;</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="challenges-body">
+    <!-- Topic Filter -->
+    <div class="filter-section">
+      <div class="filter-label">Filter by Topic</div>
+      <div class="topic-filters">
+        @for (f of filters; track f.value) {
+          <button class="topic-btn"
+            [class.active]="selectedFilter === f.value"
+            (click)="selectedFilter = f.value; filterChallenges()">
+            <span class="topic-icon">{{ f.icon }}</span>
+            {{ f.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="results-bar">
+      <span class="results-count">{{ displayedChallenges.length }} challenges</span>
+      <div class="diff-legend">
+        <span class="leg easy">Easy</span>
+        <span class="leg medium">Medium</span>
+        <span class="leg hard">Hard</span>
+        <span class="leg expert">Expert</span>
+      </div>
+    </div>
+
+    <!-- Challenge Grid -->
+    <div class="challenges-grid">
+      @for (ch of displayedChallenges; track ch.id; let i = $index) {
+        <div class="challenge-card">
+          <div class="card-accent" [class]="getDiffClass(ch.difficulty)"></div>
+          <div class="card-body">
+            <div class="card-top">
+              <div class="card-left">
+                <span class="diff-pill" [class]="getDiffClass(ch.difficulty)">
+                  {{ getDiffLabel(ch.difficulty) }}
+                </span>
+                @if (ch.premium) {
+                  <span class="pro-pill">PRO</span>
+                }
+              </div>
+              <div class="card-pts">
+                <mat-icon>bolt</mat-icon>{{ ch.xpReward }} XP
+              </div>
+            </div>
+
+            <h3 class="card-title">{{ ch.title }}</h3>
+            <p class="card-desc">{{ ch.description }}</p>
+
+            <div class="card-tags">
+              <span class="tag db-tag"><mat-icon>storage</mat-icon>{{ ch.databaseName }}</span>
+              <span class="tag pts-tag"><mat-icon>star</mat-icon>{{ ch.points }} pts</span>
+              @if (ch.topic) {
+                <span class="tag">{{ ch.topic }}</span>
+              }
+            </div>
+
+            <div class="card-footer">
+              @if (ch.totalSubmissions > 0) {
+                <div class="success-bar">
+                  <div class="bar-fill" [style.width.%]="getSuccessRate(ch)"
+                    [class]="getDiffClass(ch.difficulty)"></div>
+                  <span class="bar-label">{{ getSuccessRate(ch) }}% success ({{ ch.totalSubmissions }} tries)</span>
+                </div>
+              }
+              <a [routerLink]="['/challenges', ch.id]" mat-raised-button class="solve-btn">
+                <mat-icon>code</mat-icon> Solve
+              </a>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (displayedChallenges.length === 0) {
+      <div class="empty-state">
+        <mat-icon>search_off</mat-icon>
+        <h3>No challenges found</h3>
+        <p>Try a different filter</p>
+      </div>
+    }
+  </div>
+</div>

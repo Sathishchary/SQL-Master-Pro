@@ -1,0 +1,205 @@
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-orbs">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <mat-icon>auto_stories</mat-icon>
+      <span>SQL Learning Hub</span>
+    </div>
+    <h1 class="hero-title">
+      Master SQL.<br>
+      <span class="gradient-text">Build Real Skills.</span>
+    </h1>
+    <p class="hero-sub">
+      From beginner SELECT statements to advanced window functions —
+      learn by doing with real databases.
+    </p>
+
+    <div class="hero-stats">
+      <div class="hstat">
+        <span class="hstat-val">{{ courses.length || '10' }}+</span>
+        <span class="hstat-label">Courses</span>
+      </div>
+      <div class="hstat-div"></div>
+      <div class="hstat">
+        <span class="hstat-val">120+</span>
+        <span class="hstat-label">Lessons</span>
+      </div>
+      <div class="hstat-div"></div>
+      <div class="hstat">
+        <span class="hstat-val">12K+</span>
+        <span class="hstat-label">Students</span>
+      </div>
+      <div class="hstat-div"></div>
+      <div class="hstat">
+        <span class="hstat-val">4.9★</span>
+        <span class="hstat-label">Rating</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- floating code snippet -->
+  <div class="hero-code-card">
+    <div class="code-header">
+      <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+      <span class="code-title">query.sql</span>
+    </div>
+    <pre class="code-body"><span class="kw">SELECT</span> u.name,
+       <span class="fn">COUNT</span>(o.id) <span class="kw">AS</span> orders,
+       <span class="fn">SUM</span>(o.total) <span class="kw">AS</span> revenue
+<span class="kw">FROM</span>   users u
+<span class="kw">JOIN</span>   orders o
+       <span class="kw">ON</span> u.id = o.user_id
+<span class="kw">WHERE</span>  o.created_at >= <span class="str">'2024-01-01'</span>
+<span class="kw">GROUP BY</span> u.name
+<span class="kw">ORDER BY</span> revenue <span class="kw">DESC</span>
+<span class="kw">LIMIT</span>  <span class="num">10</span>;</pre>
+    <div class="code-result">
+      <mat-icon>check_circle</mat-icon> 10 rows returned in 12ms
+    </div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters-bar">
+  <div class="filters-inner">
+    @for (f of filters; track f.value) {
+      <button class="filter-btn"
+        [class.active]="activeFilter === f.value"
+        (click)="setFilter(f.value)">
+        <mat-icon>{{ f.icon }}</mat-icon>
+        {{ f.label }}
+        @if (getCount(f.value) > 0) {
+          <span class="filter-count">{{ getCount(f.value) }}</span>
+        }
+      </button>
+    }
+  </div>
+</div>
+
+<!-- COURSE GRID -->
+<div class="courses-wrap">
+  <div class="courses-grid">
+    @for (course of filteredCourses; track course.id; let i = $index) {
+      <div class="course-card"
+        [routerLink]="course.premium ? ['/pricing'] : ['/learn', course.id]"
+        matRipple>
+
+        <!-- Card Header Gradient -->
+        <div class="card-header" [class]="'diff-' + course.difficulty.toLowerCase()">
+          <div class="card-num">{{ padNum(displayIndex(course) + 1) }}</div>
+          <div class="card-icon">{{ getModuleIcon(displayIndex(course)) }}</div>
+          <div class="card-badges">
+            <span class="diff-pill" [class]="course.difficulty.toLowerCase()">
+              {{ course.difficulty }}
+            </span>
+            @if (course.premium) {
+              <span class="pro-pill">
+                <mat-icon>workspace_premium</mat-icon> PRO
+              </span>
+            }
+          </div>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body">
+          <h3 class="card-title">{{ course.title }}</h3>
+          <p class="card-desc">{{ course.shortDescription || course.description }}</p>
+
+          <div class="card-meta">
+            <span class="meta-tag">
+              <mat-icon>menu_book</mat-icon>{{ course.totalLessons }} lessons
+            </span>
+            <span class="meta-tag">
+              <mat-icon>schedule</mat-icon>~{{ course.estimatedHours }}h
+            </span>
+            <span class="meta-tag">
+              <mat-icon>bolt</mat-icon>XP Rewards
+            </span>
+          </div>
+
+          <div class="card-skills">
+            @for (skill of getCourseSkills(i); track skill) {
+              <span class="skill-chip">{{ skill }}</span>
+            }
+          </div>
+
+          @if (getCourseProgress(course.id) > 0) {
+            <div class="card-progress">
+              <div class="prog-header">
+                <span>Progress</span>
+                <span class="prog-pct">{{ getCourseProgress(course.id) }}%</span>
+              </div>
+              <mat-progress-bar mode="determinate" [value]="getCourseProgress(course.id)"></mat-progress-bar>
+            </div>
+          }
+
+          <button class="card-cta" [class.resume]="getCourseProgress(course.id) > 0" [class.pro-cta]="course.premium">
+            <mat-icon>{{ course.premium ? 'workspace_premium' : (getCourseProgress(course.id) > 0 ? 'play_arrow' : 'rocket_launch') }}</mat-icon>
+            {{ course.premium ? 'Unlock with PRO' : (getCourseProgress(course.id) > 0 ? 'Continue Learning' : 'Start Free') }}
+            <mat-icon class="arrow">arrow_forward</mat-icon>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Empty state -->
+    @if (filteredCourses.length === 0) {
+      <div class="empty-state">
+        <mat-icon>search_off</mat-icon>
+        <p>No courses found for this level yet</p>
+        <button mat-stroked-button (click)="setFilter('all')">Show All Courses</button>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- LEARNING PATH TIMELINE -->
+<div class="path-section">
+  <div class="path-inner">
+    <div class="section-eyebrow">Your Journey</div>
+    <h2 class="section-title">From Zero to SQL Hero</h2>
+    <div class="path-timeline">
+      @for (step of journeySteps; track $index; let i = $index, last = $last) {
+        <div class="path-node">
+          <div class="node-circle" [class]="step.color">
+            <mat-icon>{{ step.icon }}</mat-icon>
+          </div>
+          @if (!last) {
+            <div class="node-connector"></div>
+          }
+          <div class="node-info">
+            <div class="node-label">{{ step.level }}</div>
+            <div class="node-title">{{ step.title }}</div>
+            <div class="node-skills">
+              @for (s of step.skills; track s) {
+                <span>{{ s }}</span>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES STRIP -->
+<div class="features-strip">
+  <div class="features-inner">
+    @for (f of features; track f.title) {
+      <div class="feature-item">
+        <div class="feature-icon" [style.background]="f.bg">
+          <mat-icon [style.color]="f.color">{{ f.icon }}</mat-icon>
+        </div>
+        <div class="feature-text">
+          <div class="feature-title">{{ f.title }}</div>
+          <div class="feature-desc">{{ f.desc }}</div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

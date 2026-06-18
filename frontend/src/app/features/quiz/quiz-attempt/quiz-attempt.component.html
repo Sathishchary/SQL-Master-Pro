@@ -1,0 +1,220 @@
+<!-- ── ACTIVE QUIZ ── -->
+@if (quiz && !quizCompleted) {
+  <div class="quiz-wrap">
+
+    <!-- Sticky Header -->
+    <div class="sticky-bar" [class.warn]="timeLeft < 120" [class.danger]="timeLeft < 60">
+      <div class="sb-left">
+        <a routerLink="/quiz" class="back-btn"><mat-icon>arrow_back</mat-icon></a>
+        <div>
+          <div class="sb-title">{{ quiz.title }}</div>
+          <div class="sb-sub">
+            <span class="diff-pill" [class]="quiz.difficulty.toLowerCase()">{{ quiz.difficulty }}</span>
+            <span>{{ answeredCount }}/{{ questions.length }} answered</span>
+          </div>
+        </div>
+      </div>
+      <div class="sb-center">
+        <div class="progress-track">
+          <div class="progress-fill" [style.width.%]="(answeredCount / questions.length) * 100"></div>
+        </div>
+      </div>
+      <div class="sb-right">
+        <div class="timer" [class.warn]="timeLeft < 120" [class.danger]="timeLeft < 60">
+          <mat-icon>timer</mat-icon>
+          <span>{{ formatTime(timeLeft) }}</span>
+        </div>
+        <button class="submit-top-btn" (click)="confirmSubmit()">
+          <mat-icon>check</mat-icon> Submit
+        </button>
+      </div>
+    </div>
+
+    <!-- Two-column layout -->
+    <div class="quiz-body">
+
+      <!-- LEFT: Question palette -->
+      <div class="palette-col">
+        <div class="palette-card">
+          <div class="palette-title">Questions</div>
+          <div class="palette-grid">
+            @for (q of questions; track q.id; let i = $index) {
+              <button class="pq-btn"
+                [class.answered]="answers[q.id]"
+                [class.active]="activeQ === i"
+                (click)="scrollTo(i)">
+                {{ i + 1 }}
+              </button>
+            }
+          </div>
+          <div class="palette-legend">
+            <span class="leg answered"></span> Answered
+            <span class="leg"></span> Unanswered
+          </div>
+          <div class="palette-stats">
+            <div class="ps-item green">
+              <span class="ps-num">{{ answeredCount }}</span>
+              <span class="ps-lbl">Answered</span>
+            </div>
+            <div class="ps-item gray">
+              <span class="ps-num">{{ questions.length - answeredCount }}</span>
+              <span class="ps-lbl">Remaining</span>
+            </div>
+          </div>
+          <button class="submit-side-btn" (click)="confirmSubmit()">
+            <mat-icon>send</mat-icon> Submit Quiz
+          </button>
+        </div>
+      </div>
+
+      <!-- RIGHT: All questions -->
+      <div class="questions-col">
+        @for (q of questions; track q.id; let i = $index) {
+          <div class="question-card"
+            [id]="'q' + i"
+            [class.answered]="answers[q.id]">
+
+            <!-- Question header -->
+            <div class="qh">
+              <div class="qh-left">
+                <span class="q-num">Q{{ i + 1 }}</span>
+                <span class="q-pts">{{ q.points }} pt{{ q.points > 1 ? 's' : '' }}</span>
+                <span class="q-diff" [class]="q.difficulty.toLowerCase()">{{ q.difficulty }}</span>
+                @if (q.topic) {
+                  <span class="q-topic">{{ q.topic }}</span>
+                }
+              </div>
+              @if (answers[q.id]) {
+                <mat-icon class="answered-icon">check_circle</mat-icon>
+              }
+            </div>
+
+            <!-- Question text -->
+            <p class="q-text">{{ q.questionText }}</p>
+
+            <!-- MCQ Options -->
+            @if (q.questionType === 'MCQ') {
+              <div class="options">
+                @for (opt of getOptions(q); track opt.value) {
+                  <div class="option"
+                    [class.selected]="answers[q.id] === opt.value"
+                    (click)="selectAnswer(q.id, opt.value)">
+                    <div class="opt-label" [class.selected]="answers[q.id] === opt.value">{{ opt.label }}</div>
+                    <span class="opt-text">{{ opt.text }}</span>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- True / False -->
+            @if (q.questionType === 'TRUE_FALSE') {
+              <div class="tf-row">
+                <button class="tf-btn true-btn" [class.selected]="answers[q.id] === 'TRUE'"
+                  (click)="selectAnswer(q.id, 'TRUE')">
+                  <mat-icon>check</mat-icon> True
+                </button>
+                <button class="tf-btn false-btn" [class.selected]="answers[q.id] === 'FALSE'"
+                  (click)="selectAnswer(q.id, 'FALSE')">
+                  <mat-icon>close</mat-icon> False
+                </button>
+              </div>
+            }
+
+            <!-- Hint -->
+            @if (q.hint) {
+              <div class="hint-toggle" (click)="toggleHint(i)">
+                <mat-icon>lightbulb</mat-icon>
+                {{ shownHints[i] ? 'Hide Hint' : 'Show Hint' }}
+              </div>
+            }
+            @if (q.hint && shownHints[i]) {
+              <div class="hint-box">
+                <mat-icon>lightbulb</mat-icon> {{ q.hint }}
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Bottom submit -->
+        <div class="bottom-submit">
+          <div class="bs-info">
+            <mat-icon>info</mat-icon>
+            {{ questions.length - answeredCount }} question{{ questions.length - answeredCount !== 1 ? 's' : '' }} unanswered
+          </div>
+          <button class="submit-big-btn" (click)="confirmSubmit()">
+            <mat-icon>send</mat-icon> Submit Quiz
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ── RESULTS ── -->
+@if (quizCompleted && result) {
+  <div class="results-wrap">
+    <div class="results-card">
+
+      <div class="rc-header" [class.passed]="result.passed" [class.failed]="!result.passed">
+        <div class="rc-icon">{{ result.passed ? '🏆' : '📚' }}</div>
+        <h1>{{ result.passed ? 'Congratulations!' : 'Keep Practicing!' }}</h1>
+        <p>{{ result.passed ? 'You passed the quiz!' : 'Score ' + quiz!.passScore + '% or more to pass.' }}</p>
+      </div>
+
+      <div class="rc-score">
+        <div class="score-ring" [class.passed]="result.passed">
+          <svg viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#f0f0f0" stroke-width="10"/>
+            <circle cx="60" cy="60" r="50" fill="none"
+              [attr.stroke]="result.passed ? '#22c55e' : '#f59e0b'"
+              stroke-width="10" stroke-linecap="round"
+              [attr.stroke-dasharray]="314"
+              [attr.stroke-dashoffset]="314 - (314 * result.score / 100)"
+              transform="rotate(-90 60 60)"/>
+          </svg>
+          <div class="ring-text">
+            <div class="ring-score">{{ result.score }}%</div>
+            <div class="ring-label">Score</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rc-stats">
+        <div class="rstat">
+          <mat-icon class="green">check_circle</mat-icon>
+          <span class="rv">{{ result.correctAnswers }}</span>
+          <span class="rl">Correct</span>
+        </div>
+        <div class="rstat">
+          <mat-icon class="red">cancel</mat-icon>
+          <span class="rv">{{ result.totalQuestions - result.correctAnswers }}</span>
+          <span class="rl">Wrong</span>
+        </div>
+        <div class="rstat">
+          <mat-icon class="blue">timer</mat-icon>
+          <span class="rv">{{ formatTime(result.timeTakenSeconds) }}</span>
+          <span class="rl">Time</span>
+        </div>
+        <div class="rstat">
+          <mat-icon class="purple">bolt</mat-icon>
+          <span class="rv">+{{ result.xpEarned }}</span>
+          <span class="rl">XP Earned</span>
+        </div>
+      </div>
+
+      <div class="rc-actions">
+        <a routerLink="/quiz" class="rc-btn outline">
+          <mat-icon>arrow_back</mat-icon> All Quizzes
+        </a>
+        <button class="rc-btn primary" (click)="retryQuiz()">
+          <mat-icon>refresh</mat-icon> Retry
+        </button>
+        <a routerLink="/dashboard" class="rc-btn outline">
+          <mat-icon>dashboard</mat-icon> Dashboard
+        </a>
+      </div>
+
+    </div>
+  </div>
+}

@@ -1,0 +1,7 @@
+.verify-page { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 64px); }
+.verify-card { max-width: 420px; width: 100%; border-radius: 20px !important; }
+.verifying-state, .success-state, .error-state { text-align: center; padding: 32px;
+  .icon { font-size: 64px; margin-bottom: 16px; }
+  h1 { font-size: 24px; font-weight: 800; }
+  p { color: var(--text-secondary); margin-bottom: 24px; }
+}

@@ -1,0 +1,38 @@
+<div class="certs-container">
+  <div class="certs-header">
+    <h1>🎓 My Certificates</h1>
+    <p>Your earned SQL certifications. Share them on LinkedIn and showcase your skills.</p>
+  </div>
+  @if (!certificates.length) {
+    <div class="empty-state">
+      <div class="empty-icon">🎓</div>
+      <h3>No certificates yet</h3>
+      <p>Complete a full SQL module to earn your first certificate!</p>
+      <a routerLink="/learn" mat-raised-button color="primary">Start Learning</a>
+    </div>
+  }
+  <div class="certs-grid">
+    @for (cert of certificates; track cert.certificateNumber) {
+      <div class="cert-card">
+        <div class="cert-preview">
+          <div class="cert-logo">⚡ SQL Master Pro</div>
+          <div class="cert-title">Certificate of Completion</div>
+          <div class="cert-course">{{ cert.course?.title }}</div>
+          <div class="cert-number">{{ cert.certificateNumber }}</div>
+          <div class="cert-date">Issued: {{ cert.issuedAt | date:'longDate' }}</div>
+        </div>
+        <div class="cert-actions">
+          <button mat-raised-button color="primary" (click)="downloadCert(cert)">
+            <mat-icon>download</mat-icon> Download PDF
+          </button>
+          <button mat-stroked-button (click)="verifyCert(cert.certificateNumber)">
+            <mat-icon>verified</mat-icon> Verify
+          </button>
+          <button mat-stroked-button (click)="shareLinkedIn(cert)">
+            <mat-icon>share</mat-icon> LinkedIn
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

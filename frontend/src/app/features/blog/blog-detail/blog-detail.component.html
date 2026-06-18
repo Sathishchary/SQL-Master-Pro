@@ -1,0 +1,38 @@
+@if (blog) {
+  <div class="blog-detail-container">
+    <div class="blog-hero">
+      <div class="blog-meta">
+        <span class="category">{{ blog.category }}</span>
+        <span class="reading-time">{{ blog.readingTimeMinutes }} min read</span>
+      </div>
+      <h1 class="blog-title">{{ blog.title }}</h1>
+      <p class="blog-excerpt">{{ blog.excerpt }}</p>
+      @if (blog.author) {
+        <div class="author-info">
+          <div class="avatar">{{ blog.author.firstName[0] }}{{ blog.author.lastName[0] }}</div>
+          <div>
+            <div class="author-name">{{ blog.author.firstName }} {{ blog.author.lastName }}</div>
+            <div class="pub-date">{{ blog.publishedAt | date:'longDate' }}</div>
+          </div>
+          <div class="blog-stats">
+            <span><mat-icon>visibility</mat-icon> {{ blog.views }}</span>
+            <span><mat-icon>favorite</mat-icon> {{ blog.likes }}</span>
+          </div>
+        </div>
+      }
+    </div>
+    <div class="blog-body" [innerHTML]="blog.content"></div>
+    @if (blog.tags) {
+      <div class="blog-tags">
+        <mat-chip-set>
+          @for (tag of getTags(blog.tags); track tag) {
+            <mat-chip>{{ tag }}</mat-chip>
+          }
+        </mat-chip-set>
+      </div>
+    }
+    <div class="blog-nav">
+      <a routerLink="/blog" mat-stroked-button><mat-icon>arrow_back</mat-icon> Back to Blog</a>
+    </div>
+  </div>
+}

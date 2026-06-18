@@ -1,0 +1,164 @@
+<div class="co-wrap">
+  <div class="co-card">
+
+    <!-- Header -->
+    <div class="co-header">
+      <div class="co-icon-wrap"><mat-icon>workspace_premium</mat-icon></div>
+      <h1>Complete Your Purchase</h1>
+      <p>Unlock premium SQL learning features</p>
+    </div>
+
+    <!-- Plan summary -->
+    @if (planDetails) {
+      <div class="plan-box">
+        <div class="plan-name">{{ planDetails.name | uppercase }}</div>
+        <div class="plan-price">
+          <span class="cur">₹</span>
+          <span class="amt">{{ planDetails.price }}</span>
+          <span class="per">/{{ billingCycle }}</span>
+        </div>
+        <div class="plan-features">
+          @for (f of planDetails.features; track f) {
+            <div class="feat"><mat-icon>check_circle</mat-icon> {{ f }}</div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Payment method tabs -->
+    <div class="method-label">Choose Payment Method</div>
+    <div class="method-tabs">
+      <button class="m-tab" [class.active]="payMethod === 'razorpay'" (click)="payMethod = 'razorpay'">
+        <mat-icon>lock</mat-icon>
+        <div>
+          <strong>Razorpay</strong>
+          <span>Cards · UPI · Net Banking</span>
+        </div>
+        @if (payMethod === 'razorpay') {
+          <mat-icon class="check">check_circle</mat-icon>
+        }
+      </button>
+      <button class="m-tab" [class.active]="payMethod === 'upi'" (click)="payMethod = 'upi'">
+        <mat-icon>smartphone</mat-icon>
+        <div>
+          <strong>Pay via UPI</strong>
+          <span>GPay · PhonePe · Paytm</span>
+        </div>
+        @if (payMethod === 'upi') {
+          <mat-icon class="check">check_circle</mat-icon>
+        }
+      </button>
+    </div>
+
+    <!-- ── RAZORPAY SECTION ── -->
+    @if (payMethod === 'razorpay') {
+      <div class="rzp-section">
+        <button class="pay-btn rzp-btn" (click)="initiateRazorpay()" [disabled]="rzpLoading">
+          @if (rzpLoading) {
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            <mat-icon>lock</mat-icon>
+          }
+          {{ rzpLoading ? 'Processing...' : 'Pay Securely with Razorpay' }}
+        </button>
+        <div class="rzp-supports">
+          <span class="supp-label">Supported:</span>
+          <span class="supp-pill">💳 Cards</span>
+          <span class="supp-pill upi-pill">🔷 UPI</span>
+          <span class="supp-pill">🏦 Net Banking</span>
+          <span class="supp-pill">👛 Wallets</span>
+        </div>
+        <div class="upi-apps-hint">
+          <mat-icon>info</mat-icon>
+          UPI auto-detects Google Pay, PhonePe, Paytm &amp; BHIM inside the Razorpay popup.
+        </div>
+      </div>
+    }
+
+    <!-- ── DIRECT UPI SECTION ── -->
+    @if (payMethod === 'upi') {
+      <div class="upi-section">
+
+        <!-- UPI ID row -->
+        <div class="upi-id-card">
+          <div class="upi-id-label">Pay to UPI ID</div>
+          <div class="upi-id-row">
+            <span class="upi-id-text">{{ upiId }}</span>
+            <button class="copy-btn" (click)="copyUpiId()" [class.copied]="copied">
+              <mat-icon>{{ copied ? 'check' : 'content_copy' }}</mat-icon>
+              {{ copied ? 'Copied!' : 'Copy' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- QR code -->
+        <div class="upi-qr-card">
+          <img src="assets/images/qrcode.jpg" alt="UPI QR code" class="upi-qr-img" />
+          <div class="upi-qr-caption">Scan to pay with any UPI app</div>
+        </div>
+
+        <!-- UPI app deep-link buttons -->
+        <div class="app-label">Open your UPI app and pay</div>
+        <div class="upi-apps">
+          <a [href]="gpayLink" class="upi-app-btn gpay" target="_blank" rel="noopener">
+            <span class="app-logo">G</span>
+            Google Pay
+          </a>
+          <a [href]="phonepeLink" class="upi-app-btn phonepe" target="_blank" rel="noopener">
+            <span class="app-logo">P</span>
+            PhonePe
+          </a>
+          <a [href]="paytmLink" class="upi-app-btn paytm" target="_blank" rel="noopener">
+            <span class="app-logo">₿</span>
+            Paytm
+          </a>
+          <a [href]="bhimLink" class="upi-app-btn bhim" target="_blank" rel="noopener">
+            <span class="app-logo">B</span>
+            BHIM / Other
+          </a>
+        </div>
+
+        <!-- Amount reminder -->
+        <div class="amount-remind">
+          <mat-icon>currency_rupee</mat-icon>
+          Send exactly <strong>₹{{ planDetails?.price }}</strong> to complete your purchase.
+        </div>
+
+        <!-- UTR form -->
+        <div class="utr-section">
+          <div class="utr-label">After payment, enter your Transaction / UTR ID</div>
+          <input class="utr-input"
+            [(ngModel)]="utrNumber"
+            placeholder="e.g. 426312345678"
+            maxlength="50" />
+          <button class="pay-btn upi-submit-btn"
+            (click)="submitUpiPayment()"
+            [disabled]="!utrNumber.trim() || upiLoading">
+            @if (upiLoading) {
+              <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+              <mat-icon>send</mat-icon>
+            }
+            {{ upiLoading ? 'Submitting...' : 'Confirm UPI Payment' }}
+          </button>
+        </div>
+
+        <div class="upi-note">
+          <mat-icon>schedule</mat-icon>
+          UPI payments are manually verified within <strong>24 hours</strong>.
+          Your subscription activates after verification.
+        </div>
+      </div>
+    }
+
+    <!-- Cancel -->
+    <a routerLink="/pricing" class="cancel-link">Cancel</a>
+
+    <!-- Security note -->
+    <div class="security-note">
+      <mat-icon>security</mat-icon>
+      Secured by Razorpay · 256-bit SSL encryption
+    </div>
+
+  </div>
+</div>

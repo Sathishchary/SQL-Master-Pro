@@ -1,0 +1,160 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="greeting">
+        <h1>Welcome back, {{ user?.firstName }}! 👋</h1>
+        <p>{{ motivationText }}</p>
+      </div>
+      <div class="streak-badge">
+        <mat-icon>local_fire_department</mat-icon>
+        <span class="streak-count">{{ stats?.learningStreak || 0 }}</span>
+        <span class="streak-label">day streak</span>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats">
+      @for (stat of quickStats; track stat.label) {
+        <div class="stat-card">
+          <div class="stat-icon" [style.color]="stat.color">
+            <mat-icon>{{ stat.icon }}</mat-icon>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">{{ stat.value }}</div>
+            <div class="stat-label">{{ stat.label }}</div>
+          </div>
+          @if (stat.progress !== undefined) {
+            <mat-progress-bar
+              mode="determinate" [value]="stat.progress"
+              [color]="stat.progress > 50 ? 'primary' : 'accent'">
+            </mat-progress-bar>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <!-- Left Column -->
+    <div class="left-col">
+      <!-- Continue Learning -->
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-card-title>📚 Continue Learning</mat-card-title>
+          <a routerLink="/learn" mat-button color="primary">View All</a>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="course-progress-list">
+            @for (course of recentCourses; track course.id) {
+              <div class="course-item" [routerLink]="['/learn', course.id]">
+                <div class="course-icon">{{ course.icon }}</div>
+                <div class="course-info">
+                  <div class="course-name">{{ course.title }}</div>
+                  <div class="course-progress-text">{{ course.progress }}% complete</div>
+                  <mat-progress-bar mode="determinate" [value]="course.progress" color="primary">
+                  </mat-progress-bar>
+                </div>
+                <mat-icon class="chevron">chevron_right</mat-icon>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Recent Quiz Attempts -->
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-card-title>🏆 Quiz Performance</mat-card-title>
+          <a routerLink="/quiz" mat-button color="primary">Take Quiz</a>
+        </mat-card-header>
+        <mat-card-content>
+          @if (!recentAttempts.length) {
+            <div class="no-data">
+              <mat-icon>quiz</mat-icon>
+              <p>No quiz attempts yet. <a routerLink="/quiz">Take your first quiz!</a></p>
+            </div>
+          }
+          <div class="attempt-list">
+            @for (attempt of recentAttempts.slice(0, 5); track attempt.quizId) {
+              <div class="attempt-item">
+                <div class="attempt-info">
+                  <div class="attempt-quiz">Quiz #{{ attempt.quizId }}</div>
+                  <div class="attempt-date">{{ attempt.attemptedAt | date:'short' }}</div>
+                </div>
+                <div class="attempt-score" [class.passed]="attempt.passed" [class.failed]="!attempt.passed">
+                  {{ attempt.score }}%
+                  <mat-icon>{{ attempt.passed ? 'check_circle' : 'cancel' }}</mat-icon>
+                </div>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Right Column -->
+    <div class="right-col">
+      <!-- XP & Subscription -->
+      <mat-card class="xp-card">
+        <mat-card-content>
+          <div class="xp-header">
+            <div class="xp-icon">⚡</div>
+            <div>
+              <div class="xp-total">{{ stats?.totalXp || 0 }} XP</div>
+              <div class="xp-label">Total Experience Points</div>
+            </div>
+          </div>
+          <div class="plan-badge" [class]="stats?.subscriptionPlan?.toLowerCase()">
+            {{ stats?.subscriptionPlan || 'FREE' }} Plan
+          </div>
+          @if (stats?.subscriptionPlan === 'FREE') {
+            <a routerLink="/pricing" mat-raised-button color="primary" class="upgrade-btn">
+              <mat-icon>upgrade</mat-icon> Upgrade to Pro
+            </a>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Quick Actions -->
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-card-title>⚡ Quick Actions</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="quick-actions">
+            <a routerLink="/playground" mat-raised-button class="action-btn playground">
+              <mat-icon>code</mat-icon> SQL Playground
+            </a>
+            <a routerLink="/quiz" mat-raised-button class="action-btn quiz">
+              <mat-icon>quiz</mat-icon> Take a Quiz
+            </a>
+            <a routerLink="/challenges" mat-raised-button class="action-btn challenge">
+              <mat-icon>psychology</mat-icon> Challenges
+            </a>
+            <a routerLink="/interview-prep" mat-raised-button class="action-btn interview">
+              <mat-icon>work</mat-icon> Interview Prep
+            </a>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Achievements -->
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-card-title>🎖️ Achievements</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="achievements-grid">
+            @for (ach of achievements; track ach.name) {
+              <div class="achievement" [class.earned]="ach.earned">
+                <div class="ach-icon">{{ ach.icon }}</div>
+                <div class="ach-name">{{ ach.name }}</div>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

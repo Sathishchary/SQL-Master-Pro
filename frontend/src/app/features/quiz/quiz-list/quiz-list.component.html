@@ -1,0 +1,147 @@
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-orb orb1"></div>
+  <div class="hero-orb orb2"></div>
+  <div class="hero-inner">
+    <div class="hero-badge"><mat-icon>workspace_premium</mat-icon> SQL Quiz Bank</div>
+    <h1>Test Your SQL Knowledge</h1>
+    <p>1,200+ questions across three difficulty levels — from fundamentals to expert-level interview prep.</p>
+    <div class="hero-stats">
+      <div class="hstat"><span class="hv">300+</span><span class="hl">Beginner Qs</span></div>
+      <div class="hdiv"></div>
+      <div class="hstat"><span class="hv">500+</span><span class="hl">Intermediate Qs</span></div>
+      <div class="hdiv"></div>
+      <div class="hstat"><span class="hv">400+</span><span class="hl">Advanced Qs</span></div>
+      <div class="hdiv"></div>
+      <div class="hstat"><span class="hv">4.9★</span><span class="hl">Rating</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="page-container">
+
+  <!-- ── LEVEL CARDS ── -->
+  <div class="section-label">Choose Your Level</div>
+  <div class="level-cards">
+
+    <div class="level-card beginner" (click)="selectFilter('BEGINNER')">
+      <div class="lc-icon">🌱</div>
+      <div class="lc-badge">Beginner</div>
+      <h3>SQL Foundations</h3>
+      <p>SELECT, WHERE, ORDER BY, GROUP BY, basic JOINs and functions</p>
+      <ul class="lc-topics">
+        <li><mat-icon>check_circle</mat-icon> SELECT & Filtering</li>
+        <li><mat-icon>check_circle</mat-icon> Sorting & Limiting</li>
+        <li><mat-icon>check_circle</mat-icon> String & Date Functions</li>
+      </ul>
+      <div class="lc-meta">
+        <span><mat-icon>quiz</mat-icon> 3 quizzes</span>
+        <span><mat-icon>timer</mat-icon> 12–20 min each</span>
+      </div>
+      <button class="lc-btn" [routerLink]="['/quiz', 1, 'attempt']">
+        Start Basic Quiz <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+
+    <div class="level-card intermediate" (click)="selectFilter('INTERMEDIATE')">
+      <div class="lc-icon">⚡</div>
+      <div class="lc-badge">Intermediate</div>
+      <h3>SQL Mastery</h3>
+      <p>Joins, aggregates, subqueries, set operations and CASE expressions</p>
+      <ul class="lc-topics">
+        <li><mat-icon>check_circle</mat-icon> All JOIN Types</li>
+        <li><mat-icon>check_circle</mat-icon> Subqueries & EXISTS</li>
+        <li><mat-icon>check_circle</mat-icon> UNION, INTERSECT</li>
+      </ul>
+      <div class="lc-meta">
+        <span><mat-icon>quiz</mat-icon> 5 quizzes</span>
+        <span><mat-icon>timer</mat-icon> 20–35 min each</span>
+      </div>
+      <button class="lc-btn" [routerLink]="['/quiz', 4, 'attempt']">
+        Start Intermediate Quiz <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+
+    <div class="level-card advanced" (click)="selectFilter('ADVANCED')">
+      <div class="lc-icon">🚀</div>
+      <div class="lc-badge">Advanced</div>
+      <h3>SQL Expert</h3>
+      <p>Window functions, CTEs, indexing, transactions and database design</p>
+      <ul class="lc-topics">
+        <li><mat-icon>check_circle</mat-icon> Window Functions</li>
+        <li><mat-icon>check_circle</mat-icon> CTEs & Recursive</li>
+        <li><mat-icon>check_circle</mat-icon> Performance Tuning</li>
+      </ul>
+      <div class="lc-meta">
+        <span><mat-icon>quiz</mat-icon> 6 quizzes</span>
+        <span><mat-icon>timer</mat-icon> 40–90 min each</span>
+      </div>
+      <button class="lc-btn" [routerLink]="['/quiz', 9, 'attempt']">
+        Start Advanced Quiz <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ── FILTERS ── -->
+  <div class="section-label" style="margin-top:48px">All Quizzes</div>
+  <div class="filter-bar">
+    @for (f of filters; track f.value) {
+      <button class="filter-btn"
+        [class.active]="selectedFilter === f.value"
+        (click)="selectFilter(f.value)">
+        <mat-icon>{{ f.icon }}</mat-icon> {{ f.label }}
+        <span class="fc">{{ getCategoryCount(f.value) }}</span>
+      </button>
+    }
+  </div>
+
+  <!-- ── QUIZ GRID ── -->
+  <div class="quiz-grid">
+    @for (quiz of displayedQuizzes; track quiz.id; let i = $index) {
+      <div class="quiz-card" [routerLink]="['/quiz', quiz.id, 'attempt']">
+        <div class="qc-top">
+          <span class="diff-badge" [class]="quiz.difficulty.toLowerCase()">{{ quiz.difficulty }}</span>
+          @if (quiz.premium) {
+            <span class="premium-badge"><mat-icon>lock</mat-icon> PRO</span>
+          }
+        </div>
+        <div class="qc-num">{{ String(i + 1).padStart(2, '0') }}</div>
+        <h3 class="qc-title">{{ quiz.title }}</h3>
+        <p class="qc-desc">{{ quiz.description }}</p>
+        <div class="qc-meta">
+          <span><mat-icon>timer</mat-icon> {{ quiz.timeLimitMinutes }} min</span>
+          <span><mat-icon>verified</mat-icon> Pass: {{ quiz.passScore }}%</span>
+          <span><mat-icon>bolt</mat-icon> XP Rewards</span>
+        </div>
+        <div class="qc-footer">
+          <div class="diff-bar">
+            <div class="diff-fill" [class]="quiz.difficulty.toLowerCase()"
+              [style.width.%]="getDiffWidth(quiz.difficulty)"></div>
+          </div>
+          <span class="qc-start">Take Quiz <mat-icon>arrow_forward</mat-icon></span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- ── INTERVIEW SECTION ── -->
+  <div class="interview-banner">
+    <div class="ib-left">
+      <div class="ib-icon">💼</div>
+      <div>
+        <h2>Interview Preparation</h2>
+        <p>200+ company-specific SQL questions used in real FAANG interviews.</p>
+        <div class="company-chips">
+          @for (c of companies; track c) {
+            <span class="chip">{{ c }}</span>
+          }
+        </div>
+      </div>
+    </div>
+    <a routerLink="/interview-prep" class="ib-btn">
+      Start Interview Prep <mat-icon>arrow_forward</mat-icon>
+    </a>
+  </div>
+
+</div>

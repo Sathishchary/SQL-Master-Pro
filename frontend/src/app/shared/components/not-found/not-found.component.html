@@ -1,0 +1,13 @@
+<div class="not-found">
+  <div class="not-found-content">
+    <div class="error-code">404</div>
+    <div class="error-emoji">🗄️</div>
+    <h1>Page Not Found</h1>
+    <p>The page you're looking for doesn't exist or the SQL query returned no results.</p>
+    <pre class="sql-error">SELECT * FROM pages WHERE url = '{{ url }}';
+-- Error: 0 rows returned</pre>
+    <a routerLink="/" mat-raised-button color="primary">
+      <mat-icon>home</mat-icon> Back to Home
+    </a>
+  </div>
+</div>

@@ -1,0 +1,178 @@
+<div class="register-wrap">
+
+  <!-- ── LEFT PANEL ── -->
+  <div class="left-panel">
+    <div class="orbs">
+      <div class="orb orb1"></div>
+      <div class="orb orb2"></div>
+      <div class="orb orb3"></div>
+    </div>
+
+    <!-- stars -->
+    @for (s of stars; track s.x) {
+      <div class="star"
+        [style.left.%]="s.x" [style.top.%]="s.y"
+        [style.width.px]="s.size" [style.height.px]="s.size"
+        [style.animation-delay.s]="s.delay"></div>
+    }
+
+    <div class="left-content">
+      <div class="brand-pill">
+        <mat-icon>bolt</mat-icon>
+        <span>SQL Master Pro</span>
+      </div>
+
+      <h1 class="left-heading">
+        Start Your<br>
+        <span class="grad-text">SQL Journey.</span>
+      </h1>
+      <p class="left-sub">
+        Join 50,000+ developers mastering SQL with interactive lessons,
+        real database execution, and expert guidance.
+      </p>
+
+      <ul class="perks">
+        @for (p of perks; track p) {
+          <li>
+            <span class="perk-icon"><mat-icon>check</mat-icon></span>
+            <span>{{ p }}</span>
+          </li>
+        }
+      </ul>
+
+      <div class="left-stats">
+        <div class="lstat"><span class="lv">50K+</span><span class="ll">Learners</span></div>
+        <div class="ldiv"></div>
+        <div class="lstat"><span class="lv">120+</span><span class="ll">Lessons</span></div>
+        <div class="ldiv"></div>
+        <div class="lstat"><span class="lv">4.9★</span><span class="ll">Rating</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT PANEL ── -->
+  <div class="right-panel">
+    <div class="form-card">
+
+      <div class="form-header">
+        <div class="form-icon"><mat-icon>person_add</mat-icon></div>
+        <h2>Create Account</h2>
+        <p>Free forever · No credit card required</p>
+      </div>
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- Name row -->
+        <div class="row-2">
+          <div class="field-wrap" [class.focused]="focused === 'firstName'"
+               [class.has-error]="submitted && f['firstName'].errors">
+            <label>First Name <span class="req">*</span></label>
+            <div class="input-inner">
+              <mat-icon>badge</mat-icon>
+              <input type="text" formControlName="firstName" placeholder="John"
+                (focus)="focused = 'firstName'" (blur)="focused = ''">
+            </div>
+            @if (submitted && f['firstName'].hasError('required')) {
+            <div class="err-msg">Required</div>
+          }
+          </div>
+
+          <div class="field-wrap" [class.focused]="focused === 'lastName'"
+               [class.has-error]="submitted && f['lastName'].errors">
+            <label>Last Name <span class="req">*</span></label>
+            <div class="input-inner">
+              <mat-icon>badge</mat-icon>
+              <input type="text" formControlName="lastName" placeholder="Doe"
+                (focus)="focused = 'lastName'" (blur)="focused = ''">
+            </div>
+            @if (submitted && f['lastName'].hasError('required')) {
+              <div class="err-msg">Required</div>
+            }
+          </div>
+        </div>
+
+        <!-- Username -->
+        <div class="field-wrap" [class.focused]="focused === 'username'"
+             [class.has-error]="submitted && f['username'].errors">
+          <label>Username <span class="req">*</span></label>
+          <div class="input-inner">
+            <mat-icon>alternate_email</mat-icon>
+            <input type="text" formControlName="username" placeholder="johndoe123"
+              (focus)="focused = 'username'" (blur)="focused = ''">
+          </div>
+          @if (submitted && f['username'].hasError('required')) { <div class="err-msg">Username required</div> }
+          @if (submitted && f['username'].hasError('minlength')) { <div class="err-msg">Min 3 characters</div> }
+        </div>
+
+        <!-- Email -->
+        <div class="field-wrap" [class.focused]="focused === 'email'"
+             [class.has-error]="submitted && f['email'].errors">
+          <label>Email Address <span class="req">*</span></label>
+          <div class="input-inner">
+            <mat-icon>email</mat-icon>
+            <input type="email" formControlName="email" placeholder="john@example.com"
+              (focus)="focused = 'email'" (blur)="focused = ''">
+          </div>
+          @if (submitted && f['email'].hasError('required')) { <div class="err-msg">Email required</div> }
+          @if (submitted && f['email'].hasError('email')) { <div class="err-msg">Invalid email</div> }
+        </div>
+
+        <!-- Password -->
+        <div class="field-wrap" [class.focused]="focused === 'password'"
+             [class.has-error]="submitted && f['password'].errors">
+          <label>Password <span class="req">*</span></label>
+          <div class="input-inner">
+            <mat-icon>lock</mat-icon>
+            <input [type]="showPwd ? 'text' : 'password'" formControlName="password"
+              placeholder="Min 8 characters"
+              (focus)="focused = 'password'" (blur)="focused = ''">
+            <button type="button" class="eye-btn" (click)="showPwd = !showPwd">
+              <mat-icon>{{ showPwd ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+          </div>
+          <!-- Strength bar -->
+          @if (f['password'].value) {
+            <div class="strength-row">
+              <div class="strength-bar">
+                <div class="strength-fill"
+                  [style.width.%]="passwordStrength * 25"
+                  [style.background]="strengthColor"></div>
+              </div>
+              <span class="strength-label" [style.color]="strengthColor">{{ strengthLabel }}</span>
+            </div>
+          }
+          @if (submitted && f['password'].hasError('required')) { <div class="err-msg">Password required</div> }
+          @if (submitted && f['password'].hasError('minlength')) { <div class="err-msg">Min 8 characters</div> }
+        </div>
+
+        <!-- Terms -->
+        <label class="terms-check" [class.has-error]="submitted && f['terms'].hasError('required')">
+          <input type="checkbox" formControlName="terms">
+          <span class="checkmark"></span>
+          <span class="terms-text">
+            I agree to the
+            <a href="#" class="tlink">Terms of Service</a> and
+            <a href="#" class="tlink">Privacy Policy</a>
+          </span>
+        </label>
+        @if (submitted && f['terms'].hasError('required')) {
+          <div class="err-msg terms-err">You must accept the terms</div>
+        }
+
+        <!-- Submit -->
+        <button type="submit" class="submit-btn" [class.loading]="isLoading" [disabled]="isLoading">
+          @if (isLoading) { <mat-spinner diameter="20"></mat-spinner> }
+          @if (!isLoading) {
+            <span><mat-icon>rocket_launch</mat-icon> Create Free Account</span>
+          }
+        </button>
+
+      </form>
+
+      <p class="signin-row">
+        Already have an account?
+        <a routerLink="/auth/login">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>

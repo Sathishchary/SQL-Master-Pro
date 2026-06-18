@@ -1,0 +1,188 @@
+<div class="page">
+
+  <!-- ── LEFT PANEL ── -->
+  <div class="panel left-panel">
+    <!-- Animated Background -->
+    <div class="bg-layer">
+      <div class="orb orb1"></div>
+      <div class="orb orb2"></div>
+      <div class="orb orb3"></div>
+      <div class="grid-lines"></div>
+    </div>
+
+    <!-- Stars -->
+    <div class="stars">
+      @for (s of stars; track $index) {
+        <span class="star"
+          [style.left.%]="s.x" [style.top.%]="s.y"
+          [style.width.px]="s.size" [style.height.px]="s.size"
+          [style.animation-delay.s]="s.delay">
+        </span>
+      }
+    </div>
+
+    <div class="left-content">
+      <!-- Brand -->
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <span>SQL Master Pro</span>
+      </div>
+
+      <!-- Headline -->
+      <div class="headline-wrap">
+        <h1 class="headline">
+          Your SQL Journey<br>
+          <span class="gradient-text">Starts Here.</span>
+        </h1>
+        <p class="tagline">
+          Master SQL from beginner to expert with real databases,
+          AI-powered hints, and 1,200+ practice questions.
+        </p>
+      </div>
+
+      <!-- SQL Code Animation -->
+      <div class="sql-card">
+        <div class="sql-header">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="sql-file">live_query.sql</span>
+          <span class="sql-badge">● RUNNING</span>
+        </div>
+        <pre class="sql-code"><span class="kw">WITH</span> top_students <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> user_id, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> solved,
+         <span class="fn">SUM</span>(xp) <span class="kw">AS</span> total_xp
+  <span class="kw">FROM</span>   submissions
+  <span class="kw">WHERE</span>  correct = <span class="val">true</span>
+  <span class="kw">GROUP BY</span> user_id
+)
+<span class="kw">SELECT</span> u.username, s.solved,
+       <span class="fn">RANK</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> s.total_xp <span class="kw">DESC</span>)
+<span class="kw">FROM</span>   users u <span class="kw">JOIN</span> top_students s
+       <span class="kw">ON</span> u.id = s.user_id
+<span class="kw">LIMIT</span> <span class="num">10</span>;</pre>
+        <div class="sql-result">
+          <mat-icon>check_circle</mat-icon> 10 rows · 8ms
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        @for (s of stats; track s.label) {
+          <div class="stat">
+            <div class="stat-val">{{ s.val }}</div>
+            <div class="stat-label">{{ s.label }}</div>
+          </div>
+        }
+      </div>
+
+      <!-- Features -->
+      <div class="feat-list">
+        @for (f of features; track f) {
+          <div class="feat-row">
+            <div class="feat-check"><mat-icon>check</mat-icon></div>
+            <span>{{ f }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT PANEL ── -->
+  <div class="panel right-panel">
+    <div class="form-wrap">
+
+      <!-- Header -->
+      <div class="form-header">
+        <div class="form-icon">🔐</div>
+        <h2 class="form-title">Sign In</h2>
+        <p class="form-sub">Access your learning dashboard</p>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+
+        <div class="field-group">
+          <label class="field-label">Email or Username</label>
+          <div class="field-wrap" [class.focused]="focused === 'user'" [class.filled]="loginForm.get('emailOrUsername')?.value">
+            <mat-icon class="field-icon">alternate_email</mat-icon>
+            <input class="field-input" formControlName="emailOrUsername"
+              placeholder="you@example.com or username"
+              (focus)="focused='user'" (blur)="focused=''">
+          </div>
+          @if (loginForm.get('emailOrUsername')?.touched && loginForm.get('emailOrUsername')?.hasError('required')) {
+            <span class="field-error">Required</span>
+          }
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Password</label>
+          <div class="field-wrap" [class.focused]="focused === 'pass'" [class.filled]="loginForm.get('password')?.value">
+            <mat-icon class="field-icon">lock_outline</mat-icon>
+            <input class="field-input" [type]="showPassword ? 'text' : 'password'"
+              formControlName="password" placeholder="Enter your password"
+              (focus)="focused='pass'" (blur)="focused=''">
+            <button type="button" class="eye-btn" (click)="showPassword = !showPassword">
+              <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+          </div>
+          @if (loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')) {
+            <span class="field-error">Required</span>
+          }
+        </div>
+
+        <div class="form-meta">
+          <label class="remember-wrap">
+            <input type="checkbox" [(ngModel)]="rememberMe" [ngModelOptions]="{standalone: true}">
+            <span>Remember me</span>
+          </label>
+          <a routerLink="/auth/forgot-password" class="forgot-link">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="signin-btn" [disabled]="loginForm.invalid || isLoading">
+          @if (isLoading) {
+            <mat-spinner diameter="20" style="--mdc-circular-progress-active-indicator-color:white"></mat-spinner>
+          } @else {
+            <mat-icon>login</mat-icon> Sign In to Dashboard
+          }
+        </button>
+
+      </form>
+
+      <!-- Test Credentials -->
+      <div class="creds-box">
+        <div class="creds-title">
+          <mat-icon>vpn_key</mat-icon>
+          Quick Access — Test Accounts
+        </div>
+        <div class="creds-grid">
+          <div class="cred-card admin" (click)="fillCredential('admin', 'admin123')">
+            <div class="cred-role">
+              <mat-icon>admin_panel_settings</mat-icon> Admin
+            </div>
+            <div class="cred-vals">
+              <code>admin</code>
+              <span class="cred-sep">/</span>
+              <code>admin123</code>
+            </div>
+            <div class="cred-use">Click to use →</div>
+          </div>
+          <div class="cred-card user" (click)="fillCredential('dataglance', 'test123')">
+            <div class="cred-role">
+              <mat-icon>person</mat-icon> User
+            </div>
+            <div class="cred-vals">
+              <code>dataglance</code>
+              <span class="cred-sep">/</span>
+              <code>test123</code>
+            </div>
+            <div class="cred-use">Click to use →</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="register-link">
+        New to SQL Master Pro?
+        <a routerLink="/auth/register">Create a free account →</a>
+      </p>
+    </div>
+  </div>
+</div>

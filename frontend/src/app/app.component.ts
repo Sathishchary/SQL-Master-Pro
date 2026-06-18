@@ -13,22 +13,8 @@ const THEMES = ['light', 'dark'];
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet, CommonModule, NavbarComponent, FooterComponent, LoadingComponent],
-  template: `
-    <app-loading></app-loading>
-    <div class="app-layout" [class]="themeClass">
-      <app-navbar (themeSelected)="selectTheme($event)" [currentTheme]="currentTheme"></app-navbar>
-      <main class="main-content">
-        <router-outlet></router-outlet>
-      </main>
-      @if (showFooter) {
-        <app-footer></app-footer>
-      }
-    </div>
-  `,
-  styles: [`
-    .app-layout { display: flex; flex-direction: column; min-height: 100vh; }
-    .main-content { flex: 1; }
-  `]
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
   currentTheme = 'light';

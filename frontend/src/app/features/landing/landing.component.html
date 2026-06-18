@@ -1,0 +1,264 @@
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+  <div class="hero-grid"></div>
+
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-pill">
+        <span class="pill-dot"></span> New: AI SQL Assistant is live
+      </div>
+      <h1>
+        Master SQL Like a<br>
+        <span class="grad-text">Pro Developer</span>
+      </h1>
+      <p class="hero-sub">
+        The most comprehensive SQL learning platform with 650+ quiz questions,
+        real-time database execution, coding challenges, and industry-recognized certifications.
+      </p>
+      <div class="hero-btns">
+        <a routerLink="/auth/register" class="btn-primary">
+          🚀 Start Learning Free
+        </a>
+        <a routerLink="/playground" class="btn-ghost">
+          <mat-icon>play_circle</mat-icon> Try SQL Live
+        </a>
+      </div>
+      <div class="hero-trust">
+        @for (s of trustStats; track s.label) {
+          <div class="trust-stat">
+            <div class="trust-num">{{ s.num }}</div>
+            <div class="trust-label">{{ s.label }}</div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="code-card">
+        <div class="code-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="code-title">sql_playground.sql</span>
+          <span class="run-badge">▶ Run</span>
+        </div>
+        <div class="code-body">
+<pre><span class="kw">SELECT</span>
+  e.name,
+  d.department_name,
+  <span class="fn">AVG</span>(s.salary) <span class="kw">OVER</span> (
+    <span class="kw">PARTITION BY</span> d.id
+  ) <span class="kw">AS</span> dept_avg
+<span class="kw">FROM</span> employees e
+<span class="kw">JOIN</span> departments d <span class="kw">ON</span> e.dept_id = d.id
+<span class="kw">ORDER BY</span> dept_avg <span class="kw">DESC</span>;</pre>
+        </div>
+        <div class="code-result">
+          <div class="result-ok">✅ 47 rows · 12ms</div>
+          <table>
+            <thead><tr><th>name</th><th>department</th><th>dept_avg</th></tr></thead>
+            <tbody>
+              <tr><td>Alice Johnson</td><td>Engineering</td><td>$125,000</td></tr>
+              <tr><td>Bob Smith</td><td>Engineering</td><td>$125,000</td></tr>
+              <tr><td>Carol Davis</td><td>Marketing</td><td>$89,500</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="floating-badge xp-badge">🏆 +150 XP Earned!</div>
+      <div class="floating-badge cert-badge">🎓 Certificate Issued</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ LOGOS / TRUSTED BY ═══ -->
+<section class="logos-section">
+  <p class="logos-label">Trusted by developers from</p>
+  <div class="logos-row">
+    @for (c of companies; track c) {
+      <div class="logo-item">{{ c }}</div>
+    }
+  </div>
+</section>
+
+<!-- ═══ FEATURES ═══ -->
+<section class="features-section">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-badge">Platform Features</div>
+      <h2>Everything You Need to Master SQL</h2>
+      <p>A complete ecosystem — from fundamentals to enterprise-level SQL mastery</p>
+    </div>
+    <div class="features-grid">
+      @for (f of features; track f.title) {
+        <div class="feat-card">
+          <div class="feat-icon" [style.background]="f.bg">{{ f.icon }}</div>
+          <h3>{{ f.title }}</h3>
+          <p>{{ f.desc }}</p>
+          <a [routerLink]="f.link" class="feat-link">Learn more →</a>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<section class="how-section">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-badge">How It Works</div>
+      <h2>Learn SQL in 3 Simple Steps</h2>
+      <p>Structured, hands-on, and gamified — built for real results</p>
+    </div>
+    <div class="steps-grid">
+      @for (s of steps; track s.title; let i = $index) {
+        <div class="step-card">
+          <div class="step-num">{{ i + 1 }}</div>
+          <div class="step-icon">{{ s.icon }}</div>
+          <h3>{{ s.title }}</h3>
+          <p>{{ s.desc }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MODULES ═══ -->
+<section class="modules-section">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-badge">Curriculum</div>
+      <h2>10 Comprehensive SQL Modules</h2>
+      <p>Structured learning path from SQL basics to expert-level optimization</p>
+    </div>
+    <div class="modules-grid">
+      @for (m of modules; track m.title; let i = $index) {
+        <a [routerLink]="['/learn', i + 1]" class="module-card"
+          [style.--accent]="m.color">
+          <div class="mod-head">
+            <span class="mod-num">{{ String(i+1).padStart(2,'0') }}</span>
+            <span class="mod-level" [class]="m.level.toLowerCase()">{{ m.level }}</span>
+          </div>
+          <div class="mod-icon">{{ m.icon }}</div>
+          <h3>{{ m.title }}</h3>
+          <p>{{ m.desc }}</p>
+          <div class="mod-foot">
+            <span>{{ m.lessons }} lessons</span>
+            <mat-icon>arrow_forward</mat-icon>
+          </div>
+        </a>
+      }
+    </div>
+    <div class="sec-cta">
+      <a routerLink="/learn" class="btn-primary">View All Modules <mat-icon>arrow_forward</mat-icon></a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STATS ═══ -->
+<section class="stats-section">
+  <div class="wrap">
+    <div class="stats-grid">
+      @for (s of bigStats; track s.desc) {
+        <div class="stat-box">
+          <div class="stat-icon">{{ s.icon }}</div>
+          <div class="stat-val">{{ s.value }}</div>
+          <div class="stat-desc">{{ s.desc }}</div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TESTIMONIALS ═══ -->
+<section class="testimonials-section">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-badge">Testimonials</div>
+      <h2>Loved by Developers Worldwide</h2>
+      <p>See what our students say about SQL Master Pro</p>
+    </div>
+    <div class="testi-grid">
+      @for (t of testimonials; track t.name) {
+        <div class="testi-card">
+          <div class="stars">★★★★★</div>
+          <p class="testi-text">"{{ t.text }}"</p>
+          <div class="testi-author">
+            <div class="testi-avatar">{{ t.name[0] }}</div>
+            <div>
+              <div class="testi-name">{{ t.name }}</div>
+              <div class="testi-role">{{ t.role }}</div>
+            </div>
+            <div class="testi-company">{{ t.company }}</div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PRICING ═══ -->
+<section class="pricing-section">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-badge">Pricing</div>
+      <h2>Simple, Transparent Pricing</h2>
+      <p>Start free, upgrade when you're ready. No hidden fees.</p>
+    </div>
+    <div class="pricing-grid">
+      @for (p of plans; track p.name) {
+        <div class="price-card" [class.popular]="p.popular">
+          @if (p.popular) {
+            <div class="pop-label">⭐ Most Popular</div>
+          }
+          <div class="price-head">
+            <h3>{{ p.name }}</h3>
+            <div class="price-row">
+              <span class="price-currency">₹</span>
+              <span class="price-amount">{{ p.price }}</span>
+              <span class="price-period">/mo</span>
+            </div>
+            <p class="price-sub">{{ p.sub }}</p>
+          </div>
+          <ul class="price-features">
+            @for (f of p.features; track f) {
+              <li>
+                <span class="feat-check">✓</span> {{ f }}
+              </li>
+            }
+          </ul>
+          <a [routerLink]="p.price === 0 ? '/auth/register' : '/pricing'" class="price-btn"
+            [class.btn-primary]="p.popular" [class.btn-outline]="!p.popular">
+            {{ p.price === 0 ? 'Get Started Free' : 'Choose Plan' }}
+          </a>
+        </div>
+      }
+    </div>
+    <p class="pricing-note">7-day free trial on paid plans · Cancel anytime · No credit card for Free</p>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="final-cta">
+  <div class="cta-orb cta-orb-1"></div>
+  <div class="cta-orb cta-orb-2"></div>
+  <div class="cta-inner">
+    <div class="cta-badge">Join 50,000+ Developers</div>
+    <h2>Start Your SQL Journey Today</h2>
+    <p>From zero to SQL hero — structured, gamified, and built for real-world results.</p>
+    <div class="cta-btns">
+      <a routerLink="/auth/register" class="btn-primary btn-xl">
+        🚀 Get Started for Free
+      </a>
+      <a routerLink="/learn" class="btn-ghost-light btn-xl">
+        Browse Curriculum →
+      </a>
+    </div>
+    <div class="cta-perks">
+      <span>✓ Free forever plan</span>
+      <span>✓ No credit card</span>
+      <span>✓ Instant access</span>
+    </div>
+  </div>
+</section>

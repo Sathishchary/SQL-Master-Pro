@@ -1,0 +1,107 @@
+<div class="admin-analytics">
+  <div class="page-header">
+    <h1>Analytics & Reports</h1>
+    <p>Platform performance metrics and insights</p>
+  </div>
+
+  <div class="stats-grid">
+    @for (stat of stats; track stat.label) {
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-icon" [class]="stat.color"><mat-icon>{{ stat.icon }}</mat-icon></div>
+          <div class="stat-value">{{ stat.value }}</div>
+          <div class="stat-label">{{ stat.label }}</div>
+          <div class="stat-trend" [class.up]="stat.trend > 0">
+            <mat-icon>{{ stat.trend > 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
+            {{ stat.trend > 0 ? '+' : '' }}{{ stat.trend }}% this month
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+
+  <div class="charts-grid">
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>Revenue by Plan</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @if (analytics) {
+          <div class="revenue-bars">
+            @for (item of revenueSplit; track item.label) {
+              <div class="revenue-bar-item">
+                <div class="bar-label">{{ item.label }}</div>
+                <div class="bar-wrap">
+                  <div class="bar" [style.width.%]="item.pct" [class]="item.color"></div>
+                </div>
+                <div class="bar-value">{{ item.pct }}%</div>
+              </div>
+            }
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>User Growth (Last 6 Months)</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="growth-table">
+          <div class="growth-row header">
+            <span>Month</span><span>New Users</span><span>Revenue</span><span>Completions</span>
+          </div>
+          @for (row of growthData; track row.month) {
+            <div class="growth-row">
+              <span>{{ row.month }}</span>
+              <span class="highlight">{{ row.users }}</span>
+              <span>₹{{ row.revenue | number }}</span>
+              <span>{{ row.completions }}</span>
+            </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>Top Courses by Enrollment</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="top-courses">
+          @for (c of topCourses; track c.name; let i = $index) {
+            <div class="top-course-item">
+              <span class="rank">{{ i + 1 }}</span>
+              <div class="course-info">
+                <div class="course-name">{{ c.name }}</div>
+                <div class="progress-bar-wrap">
+                  <div class="progress-bar" [style.width.%]="c.pct"></div>
+                </div>
+              </div>
+              <span class="enrollment-count">{{ c.count }}</span>
+            </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>Quiz Performance Distribution</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="score-distribution">
+          @for (band of scoreBands; track band.range) {
+            <div class="score-band">
+              <div class="band-label">{{ band.range }}</div>
+              <div class="band-bar-wrap">
+                <div class="band-bar" [style.width.%]="band.pct" [class]="band.color"></div>
+              </div>
+              <div class="band-count">{{ band.pct }}%</div>
+            </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

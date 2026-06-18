@@ -1,0 +1,125 @@
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="orb o1"></div><div class="orb o2"></div>
+  <div class="hero-inner">
+    <div class="hero-badge"><mat-icon>work</mat-icon> Interview Preparation</div>
+    <h1>Crack Your SQL Interview</h1>
+    <p>200+ real questions asked at top tech companies — with detailed answers and explanations.</p>
+    <div class="company-row">
+      @for (c of companies; track c) {
+        <span class="co">{{ c }}</span>
+      }
+    </div>
+    <!-- Search -->
+    <div class="search-wrap">
+      <mat-icon>search</mat-icon>
+      <input [(ngModel)]="search" (input)="onSearch()" placeholder="Search questions…">
+      @if (search) {
+        <button (click)="search=''; onSearch()" class="clear-btn">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ── STATS ── -->
+  <div class="stats-row">
+    @for (s of stats; track s.label) {
+      <div class="stat-card">
+        <div class="sc-icon">{{ s.icon }}</div>
+        <div class="sc-val">{{ s.val }}</div>
+        <div class="sc-lbl">{{ s.label }}</div>
+      </div>
+    }
+  </div>
+
+  <!-- ── FILTERS ── -->
+  <div class="filter-bar">
+    @for (f of filters; track f.value) {
+      <button class="f-btn"
+        [class.active]="selectedFilter === f.value"
+        (click)="selectFilter(f.value)">
+        <mat-icon>{{ f.icon }}</mat-icon> {{ f.label }}
+        <span class="fc">{{ getCount(f.value) }}</span>
+      </button>
+    }
+  </div>
+
+  <!-- ── RESULTS INFO ── -->
+  @if (search) {
+    <div class="results-info">
+      <mat-icon>search</mat-icon>
+      {{ flatFiltered.length }} result{{ flatFiltered.length !== 1 ? 's' : '' }} for "<strong>{{ search }}</strong>"
+      <button (click)="search=''; onSearch()">Clear</button>
+    </div>
+  }
+
+  <!-- ── SECTIONS ── -->
+  @for (sec of filteredSections; track sec.title) {
+    <div>
+      <div class="sec-header">
+        <span class="sec-icon">{{ sec.icon }}</span>
+        <div>
+          <h2>{{ sec.title }}</h2>
+          <p>{{ sec.desc }}</p>
+        </div>
+        <span class="sec-count">{{ sec.questions.length }} questions</span>
+      </div>
+
+      <mat-accordion class="q-accordion">
+        @for (q of sec.questions; track q.question; let i = $index) {
+          <mat-expansion-panel class="q-panel">
+            <mat-expansion-panel-header>
+              <mat-panel-title class="panel-title">
+                <span class="q-idx">Q{{ i + 1 }}</span>
+                <span class="q-text">{{ q.question }}</span>
+                <span class="level-badge" [class]="q.level.toLowerCase()">{{ q.level }}</span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="q-answer">
+              <div class="answer-label"><mat-icon>lightbulb</mat-icon> Answer</div>
+              <p>{{ q.answer }}</p>
+              @if (q.tags) {
+                <div class="q-tags">
+                  @for (t of q.tags; track t) {
+                    <span class="tag">{{ t }}</span>
+                  }
+                </div>
+              }
+            </div>
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
+    </div>
+  }
+
+  <!-- ── EMPTY ── -->
+  @if (filteredSections.length === 0) {
+    <div class="empty">
+      <mat-icon>search_off</mat-icon>
+      <h3>No questions found</h3>
+      <p>Try a different search term or filter</p>
+      <button (click)="search=''; selectFilter('all')">Clear Filters</button>
+    </div>
+  }
+
+  <!-- ── CTA ── -->
+  <div class="cta-banner">
+    <div class="cta-left">
+      <h2>Ready to Practice with Real Queries?</h2>
+      <p>Test your skills with interactive SQL challenges and quizzes.</p>
+    </div>
+    <div class="cta-btns">
+      <a routerLink="/challenges" class="cta-btn primary">
+        <mat-icon>code</mat-icon> SQL Challenges
+      </a>
+      <a routerLink="/quiz" class="cta-btn outline">
+        <mat-icon>quiz</mat-icon> Take a Quiz
+      </a>
+    </div>
+  </div>
+
+</div>

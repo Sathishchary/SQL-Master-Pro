@@ -1,0 +1,78 @@
+<mat-toolbar class="navbar" [class.scrolled]="scrolled">
+  <a routerLink="/" class="brand">
+    <span class="brand-icon">⚡</span>
+    <span class="brand-name">SQL Master Pro</span>
+  </a>
+
+  @if (!isMobile) {
+  <nav class="nav-links">
+    <a routerLink="/learn" routerLinkActive="active" mat-button>Learn</a>
+    <a routerLink="/playground" routerLinkActive="active" mat-button>Playground</a>
+    <a routerLink="/quiz" routerLinkActive="active" mat-button>Quiz</a>
+    <a routerLink="/challenges" routerLinkActive="active" mat-button>Challenges</a>
+    <a routerLink="/blog" routerLinkActive="active" mat-button>Blog</a>
+    <a routerLink="/pricing" routerLinkActive="active" mat-button class="pricing-btn">
+      <mat-icon>star</mat-icon> Pricing
+    </a>
+  </nav>
+  }
+
+  <span class="spacer"></span>
+
+  <!-- Theme Dropdown -->
+  <button mat-icon-button [matMenuTriggerFor]="themeMenu" [matTooltip]="'Current: ' + currentTheme" class="theme-btn">
+    <mat-icon>{{ themeIcon }}</mat-icon>
+  </button>
+  <mat-menu #themeMenu="matMenu" class="theme-dropdown-menu">
+    <div class="theme-menu-header">Choose Theme</div>
+    @for (t of themes; track t.value) {
+    <button mat-menu-item (click)="themeSelected.emit(t.value)"
+      [class.theme-active]="currentTheme === t.value">
+      <mat-icon>{{ t.icon }}</mat-icon>
+      <span>{{ t.label }}</span>
+      @if (currentTheme === t.value) {
+      <mat-icon class="check-icon">check</mat-icon>
+      }
+    </button>
+    }
+  </mat-menu>
+
+  @if (isAuth()) {
+    <div class="nav-divider"></div>
+    <button mat-icon-button [matMenuTriggerFor]="userMenu" class="avatar-btn">
+      <div class="avatar">{{ userInitials() }}</div>
+    </button>
+
+    <mat-menu #userMenu="matMenu" xPosition="before">
+      <div class="menu-header" mat-menu-item disabled>
+        <div class="menu-user-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</div>
+        <div class="menu-user-plan">{{ currentUser()?.subscriptionPlan }} Plan</div>
+      </div>
+      <mat-divider></mat-divider>
+      <a mat-menu-item routerLink="/dashboard">
+        <mat-icon>dashboard</mat-icon> Dashboard
+      </a>
+      <a mat-menu-item routerLink="/certificates">
+        <mat-icon>workspace_premium</mat-icon> My Certificates
+      </a>
+      <a mat-menu-item routerLink="/pricing">
+        <mat-icon>upgrade</mat-icon> Upgrade Plan
+      </a>
+      @if (isAdmin()) {
+        <mat-divider></mat-divider>
+        <a mat-menu-item routerLink="/admin">
+          <mat-icon>admin_panel_settings</mat-icon> Admin Panel
+        </a>
+      }
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon> Logout
+      </button>
+    </mat-menu>
+  } @else {
+    <a routerLink="/auth/login" mat-button>Login</a>
+    <a routerLink="/auth/register" mat-raised-button color="primary" class="register-btn">
+      Get Started Free
+    </a>
+  }
+</mat-toolbar>

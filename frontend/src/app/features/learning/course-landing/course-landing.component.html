@@ -1,0 +1,134 @@
+@if (course) {
+  <div class="course-landing">
+    <!-- Hero -->
+    <div class="course-hero" [style.background]="heroGradient">
+      <div class="hero-inner">
+        <div class="hero-left">
+          <span class="diff-badge" [class]="course.difficulty.toLowerCase()">{{ course.difficulty }}</span>
+          <h1>{{ course.title }}</h1>
+          <p>{{ course.description }}</p>
+          <div class="hero-stats">
+            <span><mat-icon>menu_book</mat-icon> {{ course.totalLessons }} lessons</span>
+            <span><mat-icon>schedule</mat-icon> ~{{ course.estimatedHours }}h estimated</span>
+            @if (course.premium) {
+              <span class="pro-tag"><mat-icon>workspace_premium</mat-icon> PRO</span>
+            }
+          </div>
+        </div>
+        @if (lessons.length) {
+          <div class="hero-right">
+            <a mat-raised-button class="start-btn"
+              [routerLink]="['/learn', courseId, 'lesson', lessons[0].id]">
+              <mat-icon>play_arrow</mat-icon> Start Learning
+            </a>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Main content: lessons + sidebar -->
+    <div class="content-wrap">
+      <div class="content-main">
+        <div class="section-header">
+          <h2>Course Content</h2>
+          <span class="lesson-count">{{ lessons.length }} lessons</span>
+        </div>
+
+        <div class="lessons-list">
+          @for (lesson of lessons; track lesson.id; let i = $index) {
+            <mat-card class="lesson-card">
+              <div class="lesson-num">{{ i + 1 }}</div>
+              <div class="lesson-type-icon" [class]="lesson.lessonType.toLowerCase()">
+                <mat-icon>{{ lessonTypeIcon(lesson.lessonType) }}</mat-icon>
+              </div>
+              <div class="lesson-info">
+                <div class="lesson-title">{{ lesson.title }}</div>
+                <div class="lesson-meta">
+                  <span class="type-label">{{ lesson.lessonType }}</span>
+                  <span><mat-icon>schedule</mat-icon>{{ lesson.durationMinutes }}m</span>
+                  <span class="xp"><mat-icon>bolt</mat-icon>+{{ lesson.xpReward }} XP</span>
+                </div>
+              </div>
+              <div class="lesson-actions">
+                <button mat-icon-button matTooltip="Preview lesson" (click)="previewLesson(lesson, $event)">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <a mat-flat-button class="enter-btn" [routerLink]="['/learn', courseId, 'lesson', lesson.id]">
+                  Enter <mat-icon>arrow_forward</mat-icon>
+                </a>
+              </div>
+            </mat-card>
+          }
+        </div>
+
+        <div class="back-link">
+          <a routerLink="/learn" mat-stroked-button>
+            <mat-icon>arrow_back</mat-icon> Back to Courses
+          </a>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="content-sidebar">
+        <mat-card class="sidebar-card">
+          <h3>This course includes</h3>
+          <ul class="info-list">
+            <li><mat-icon>menu_book</mat-icon> {{ course.totalLessons }} lessons</li>
+            <li><mat-icon>schedule</mat-icon> ~{{ course.estimatedHours }} hours total</li>
+            <li><mat-icon>bolt</mat-icon> XP rewards on every lesson</li>
+            <li><mat-icon>workspace_premium</mat-icon> {{ course.premium ? 'PRO course' : 'Free access' }}</li>
+          </ul>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- More Courses -->
+    @if (moreCourses.length) {
+      <div class="more-courses-section">
+        <div class="more-courses-inner">
+          <div class="section-header">
+            <h2>More Courses You Might Like</h2>
+          </div>
+          <div class="more-courses-grid">
+            @for (c of moreCourses; track c.id) {
+              <mat-card class="more-course-card">
+                <div class="mc-header" [class]="'diff-' + c.difficulty.toLowerCase()">
+                  <span class="diff-pill" [class]="c.difficulty.toLowerCase()">{{ c.difficulty }}</span>
+                </div>
+                <div class="mc-body">
+                  <h4>{{ c.title }}</h4>
+                  <p>{{ c.shortDescription || c.description }}</p>
+                  <div class="mc-meta">
+                    <span><mat-icon>menu_book</mat-icon>{{ c.totalLessons }} lessons</span>
+                    <span><mat-icon>schedule</mat-icon>~{{ c.estimatedHours }}h</span>
+                  </div>
+                  <div class="mc-actions">
+                    <button mat-icon-button matTooltip="View course" (click)="viewCourse(c)">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    <a mat-flat-button class="enter-course-btn" [routerLink]="['/learn', c.id]">
+                      Enter Course <mat-icon>arrow_forward</mat-icon>
+                    </a>
+                  </div>
+                </div>
+              </mat-card>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+} @else if (notFound) {
+  <div class="loading-state">
+    <mat-icon>error_outline</mat-icon>
+    <p>Course not found.</p>
+    <a routerLink="/learn" mat-stroked-button>
+      <mat-icon>arrow_back</mat-icon> Back to Courses
+    </a>
+  </div>
+} @else {
+  <div class="loading-state">
+    <mat-icon class="spin-icon">refresh</mat-icon>
+    <p>Loading course...</p>
+  </div>
+}

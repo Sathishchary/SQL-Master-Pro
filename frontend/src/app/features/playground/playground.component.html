@@ -1,0 +1,272 @@
+<div class="playground-container">
+  <!-- Header -->
+  <div class="playground-header">
+    <div class="header-left">
+      <h1><mat-icon>code</mat-icon> SQL Playground</h1>
+      <p>Write, execute, and learn SQL in real-time</p>
+    </div>
+    <div class="header-actions">
+      <mat-select [(ngModel)]="selectedDatabase" class="db-select" (ngModelChange)="onDatabaseChange()">
+        @for (db of databases; track db.id) {
+          <mat-option [value]="db.id">
+            {{ db.name }}
+          </mat-option>
+        }
+      </mat-select>
+      <button mat-icon-button (click)="toggleTheme()" matTooltip="Toggle theme">
+        <mat-icon>{{ darkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="playground-layout">
+    <!-- Sidebar: Saved Queries & Sample Queries -->
+    <div class="sidebar" [class.collapsed]="sidebarCollapsed">
+      <div class="sidebar-toggle" (click)="sidebarCollapsed = !sidebarCollapsed">
+        <mat-icon>{{ sidebarCollapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+      </div>
+
+      @if (!sidebarCollapsed) {
+        <mat-tab-group>
+          <mat-tab label="Samples">
+            <div class="sample-list">
+              @for (sample of sampleQueries; track sample.name) {
+                <div class="sample-item" (click)="loadSample(sample)">
+                  <div class="sample-name">{{ sample.name }}</div>
+                  <div class="sample-desc">{{ sample.description }}</div>
+                </div>
+              }
+            </div>
+          </mat-tab>
+          <mat-tab label="Saved">
+            <div class="saved-list">
+              @if (savedLoading) {
+                <div class="no-data"><mat-spinner diameter="28"></mat-spinner></div>
+              } @else if (!filteredSaved.length) {
+                <div class="no-data">
+                  <mat-icon>bookmark_border</mat-icon>
+                  <p>No saved queries yet for this database</p>
+                </div>
+              } @else {
+                @for (q of filteredSaved; track q.id) {
+                  <div class="sample-item" (click)="loadQuery(q.query)">
+                    <div class="sample-name">{{ q.queryName || 'Untitled' }}</div>
+                    <div class="sample-desc">{{ q.executedAt | date:'short' }}</div>
+                  </div>
+                }
+              }
+            </div>
+          </mat-tab>
+          <mat-tab label="History">
+            <div class="history-list">
+              @if (historyLoading) {
+                <div class="no-data"><mat-spinner diameter="28"></mat-spinner></div>
+              } @else if (!filteredHistory.length) {
+                <div class="no-data">
+                  <mat-icon>history</mat-icon>
+                  <p>No queries executed yet for this database</p>
+                </div>
+              } @else {
+                @for (h of filteredHistory.slice(0, 20); track h.id) {
+                  <div class="history-item" (click)="loadQuery(h.query)">
+                    <div class="history-query">{{ h.query | slice:0:50 }}...</div>
+                    <div class="history-meta">
+                      <span [class]="h.success ? 'success' : 'error'">
+                        {{ h.success ? '✅' : '❌' }}
+                      </span>
+                      <span class="time-ms">{{ h.executionTimeMs }}ms</span>
+                    </div>
+                  </div>
+                }
+              }
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      }
+    </div>
+
+    <!-- Main Editor -->
+    <div class="editor-section">
+      <!-- SQL Editor -->
+      <div class="editor-wrapper" [class.dark]="darkMode" [class.fullscreen]="editorFullscreen">
+        <div class="editor-header">
+          <div class="editor-tabs">
+            <button class="editor-tab active">SQL Editor</button>
+          </div>
+          <div class="editor-actions">
+            <button mat-icon-button (click)="formatQuery()" matTooltip="Format SQL">
+              <mat-icon>auto_fix_high</mat-icon>
+            </button>
+            <button mat-icon-button (click)="clearEditor()" matTooltip="Clear">
+              <mat-icon>clear</mat-icon>
+            </button>
+            <button mat-icon-button (click)="toggleFullscreen()" [matTooltip]="editorFullscreen ? 'Exit full screen' : 'Expand full screen'">
+              <mat-icon>{{ editorFullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+            </button>
+          </div>
+        </div>
+        <textarea
+          class="sql-editor"
+          [(ngModel)]="sqlQuery"
+          placeholder="-- Write your SQL query here
+SELECT * FROM employees LIMIT 10;"
+          (keydown.ctrl.enter)="executeQuery()"
+          (keydown.meta.enter)="executeQuery()"
+          spellcheck="false">
+        </textarea>
+        <div class="editor-footer">
+          <span class="hint">Ctrl+Enter to execute{{ editorFullscreen ? ' · Esc to exit full screen' : '' }}</span>
+          <span class="char-count">{{ sqlQuery.length }} chars</span>
+        </div>
+      </div>
+
+      <!-- Execute Button -->
+      <div class="execute-bar">
+        <button mat-raised-button color="primary" (click)="executeQuery()"
+          [disabled]="isExecuting || !sqlQuery.trim()" class="execute-btn">
+          <mat-icon>play_arrow</mat-icon>
+          {{ isExecuting ? 'Executing...' : 'Run Query' }}
+        </button>
+        <button mat-button (click)="saveQuery()" [disabled]="!result">
+          <mat-icon>bookmark</mat-icon> Save
+        </button>
+        <button mat-button (click)="exportCSV()" [disabled]="!result?.rows?.length">
+          <mat-icon>download</mat-icon> Export CSV
+        </button>
+        <button mat-button (click)="toggleResultsFullscreen()" [disabled]="!result?.rows?.length">
+          <mat-icon>{{ resultsFullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+          {{ resultsFullscreen ? 'Exit Full View' : 'Full View' }}
+        </button>
+        <span class="db-indicator">
+          <mat-icon>storage</mat-icon> {{ selectedDatabase }}
+        </span>
+      </div>
+
+      <!-- Results -->
+      <div class="results-section" [class.fullscreen]="resultsFullscreen">
+        @if (resultsFullscreen) {
+          <div class="fullscreen-header">
+            <span>Query Results</span>
+            <button mat-icon-button (click)="toggleResultsFullscreen()" matTooltip="Exit full view (Esc)">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        }
+        <!-- Loading -->
+        @if (isExecuting) {
+          <div class="loading-state">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Executing query...</p>
+          </div>
+        }
+
+        <!-- Error State -->
+        @if (result && !result.success && !isExecuting) {
+          <div class="error-state">
+            <mat-icon class="error-icon">error</mat-icon>
+            <div class="error-content">
+              <div class="error-title">Query Error</div>
+              <pre class="error-message">{{ result.error }}</pre>
+            </div>
+          </div>
+        }
+
+        <!-- Success State -->
+        @if (result?.success && !isExecuting) {
+          <div class="success-state">
+            <div class="result-meta">
+              <mat-chip-set>
+                <mat-chip color="primary" highlighted>
+                  <mat-icon matChipAvatar>table_rows</mat-icon>
+                  {{ result!.rowCount }} rows
+                </mat-chip>
+                <mat-chip>
+                  <mat-icon matChipAvatar>timer</mat-icon>
+                  {{ result!.executionTimeMs }}ms
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+
+            <div class="result-table-wrapper">
+              @if (result!.columns?.length) {
+                <table class="result-table">
+                  <thead>
+                    <tr>
+                      @for (col of result!.columns; track col) {
+                        <th (click)="sortBy(col)">
+                          {{ col }}
+                          @if (sortColumn === col) {
+                            <mat-icon class="sort-icon">{{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+                          }
+                        </th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of pagedRows; track $index) {
+                      <tr>
+                        @for (col of result!.columns; track col) {
+                          <td>{{ row[col] ?? 'NULL' }}</td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+                <div class="pagination-bar">
+                  <span class="page-info">
+                    Showing {{ pageStart + 1 }}-{{ pageEnd }} of {{ sortedRows.length }}
+                  </span>
+                  <div class="page-size">
+                    <span>Rows per page:</span>
+                    <mat-select [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange()">
+                      @for (size of pageSizeOptions; track size) {
+                        <mat-option [value]="size">{{ size }}</mat-option>
+                      }
+                    </mat-select>
+                  </div>
+                  <div class="page-controls">
+                    <button mat-icon-button (click)="goToPage(0)" [disabled]="pageIndex === 0">
+                      <mat-icon>first_page</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="goToPage(pageIndex - 1)" [disabled]="pageIndex === 0">
+                      <mat-icon>chevron_left</mat-icon>
+                    </button>
+                    <span class="page-number">Page {{ pageIndex + 1 }} of {{ totalPages }}</span>
+                    <button mat-icon-button (click)="goToPage(pageIndex + 1)" [disabled]="pageIndex >= totalPages - 1">
+                      <mat-icon>chevron_right</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="goToPage(totalPages - 1)" [disabled]="pageIndex >= totalPages - 1">
+                      <mat-icon>last_page</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              }
+              @if (!result!.columns?.length) {
+                <div class="affected-rows">
+                  <mat-icon>check_circle</mat-icon>
+                  Query executed successfully. {{ result!.affectedRows }} rows affected.
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Empty State -->
+        @if (!result && !isExecuting) {
+          <div class="empty-state">
+            <h3>Ready to execute SQL</h3>
+            <p>Write a query and press Ctrl+Enter or click "Run Query"</p>
+            <div class="db-schema">
+              <h4>Available Tables in {{ selectedDatabase }}:</h4>
+              <div class="table-chips">
+                @for (t of currentDbTables; track t) {
+                  <span class="table-chip">{{ t }}</span>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

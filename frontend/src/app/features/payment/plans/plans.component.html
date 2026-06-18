@@ -1,0 +1,108 @@
+<div class="plans-container">
+  <div class="plans-header">
+    <h1>Choose Your SQL Learning Plan</h1>
+    <p>Start free, scale as you grow. All plans include core SQL content.</p>
+
+    <div class="billing-toggle">
+      <span [class.active]="!isYearly">Monthly</span>
+      <mat-slide-toggle [(ngModel)]="isYearly" color="primary"></mat-slide-toggle>
+      <span [class.active]="isYearly">
+        Yearly
+        <span class="save-badge">Save 40%</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="plans-grid">
+    @for (plan of plans; track plan.id) {
+      <div class="plan-card" [class.popular]="plan.popular">
+        @if (plan.popular) {
+          <div class="popular-ribbon">⭐ Most Popular</div>
+        }
+
+        <div class="plan-top">
+          <div class="plan-icon">{{ plan.icon }}</div>
+          <h2 class="plan-name">{{ plan.name }}</h2>
+          <p class="plan-tagline">{{ plan.tagline }}</p>
+        </div>
+
+        <div class="plan-price">
+          <span class="currency">₹</span>
+          <span class="amount">{{ isYearly ? plan.yearlyMonthly : plan.monthly }}</span>
+          <span class="period">/month</span>
+        </div>
+        @if (isYearly && plan.yearly > 0) {
+          <div class="yearly-note">
+            Billed annually ₹{{ plan.yearly }}/year
+          </div>
+        }
+
+        <ul class="plan-features">
+          @for (f of plan.features; track f.text) {
+            <li>
+              <mat-icon [class.included]="f.included" [class.excluded]="!f.included">
+                {{ f.included ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+              {{ f.text }}
+            </li>
+          }
+        </ul>
+
+        <button mat-raised-button [color]="plan.popular ? 'primary' : 'basic'"
+          [disabled]="isCurrentPlan(plan.id)"
+          (click)="selectPlan(plan)" class="plan-cta">
+          {{ isCurrentPlan(plan.id) ? 'Current Plan' : plan.cta }}
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Feature Comparison -->
+  <div class="comparison-section">
+    <h2>Full Feature Comparison</h2>
+    <div class="comparison-table-wrapper">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Free</th>
+            <th>Basic</th>
+            <th class="popular-col">Pro</th>
+            <th>Enterprise</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of comparisonRows; track row.feature) {
+            <tr>
+              <td class="feature-name">{{ row.feature }}</td>
+              @for (val of row.values; track $index) {
+                <td>
+                  @if (val === true) {
+                    <mat-icon class="check">check_circle</mat-icon>
+                  } @else if (val === false) {
+                    <mat-icon class="cross">cancel</mat-icon>
+                  } @else {
+                    <span>{{ val }}</span>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq-section">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-grid">
+      @for (faq of faqs; track faq.q) {
+        <div class="faq-item">
+          <h4>{{ faq.q }}</h4>
+          <p>{{ faq.a }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>
