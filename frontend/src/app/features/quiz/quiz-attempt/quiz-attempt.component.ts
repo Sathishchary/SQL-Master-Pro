@@ -1,0 +1,641 @@
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { Subscription, interval } from 'rxjs';
+import { ApiService } from '../../../core/services/api.service';
+import { Question, Quiz } from '../../../core/models/models';
+import { getStaticQuiz, getStaticQuestions } from '../quiz-questions.data';
+
+@Component({
+  selector: 'app-quiz-attempt',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule, MatButtonModule, MatIconModule, MatSnackBarModule],
+  template: `
+  <!-- ── ACTIVE QUIZ ── -->
+  @if (quiz && !quizCompleted) {
+    <div class="quiz-wrap">
+
+      <!-- Sticky Header -->
+      <div class="sticky-bar" [class.warn]="timeLeft < 120" [class.danger]="timeLeft < 60">
+        <div class="sb-left">
+          <a routerLink="/quiz" class="back-btn"><mat-icon>arrow_back</mat-icon></a>
+          <div>
+            <div class="sb-title">{{ quiz.title }}</div>
+            <div class="sb-sub">
+              <span class="diff-pill" [class]="quiz.difficulty.toLowerCase()">{{ quiz.difficulty }}</span>
+              <span>{{ answeredCount }}/{{ questions.length }} answered</span>
+            </div>
+          </div>
+        </div>
+        <div class="sb-center">
+          <div class="progress-track">
+            <div class="progress-fill" [style.width.%]="(answeredCount / questions.length) * 100"></div>
+          </div>
+        </div>
+        <div class="sb-right">
+          <div class="timer" [class.warn]="timeLeft < 120" [class.danger]="timeLeft < 60">
+            <mat-icon>timer</mat-icon>
+            <span>{{ formatTime(timeLeft) }}</span>
+          </div>
+          <button class="submit-top-btn" (click)="confirmSubmit()">
+            <mat-icon>check</mat-icon> Submit
+          </button>
+        </div>
+      </div>
+
+      <!-- Two-column layout -->
+      <div class="quiz-body">
+
+        <!-- LEFT: Question palette -->
+        <div class="palette-col">
+          <div class="palette-card">
+            <div class="palette-title">Questions</div>
+            <div class="palette-grid">
+              @for (q of questions; track q.id; let i = $index) {
+                <button class="pq-btn"
+                  [class.answered]="answers[q.id]"
+                  [class.active]="activeQ === i"
+                  (click)="scrollTo(i)">
+                  {{ i + 1 }}
+                </button>
+              }
+            </div>
+            <div class="palette-legend">
+              <span class="leg answered"></span> Answered
+              <span class="leg"></span> Unanswered
+            </div>
+            <div class="palette-stats">
+              <div class="ps-item green">
+                <span class="ps-num">{{ answeredCount }}</span>
+                <span class="ps-lbl">Answered</span>
+              </div>
+              <div class="ps-item gray">
+                <span class="ps-num">{{ questions.length - answeredCount }}</span>
+                <span class="ps-lbl">Remaining</span>
+              </div>
+            </div>
+            <button class="submit-side-btn" (click)="confirmSubmit()">
+              <mat-icon>send</mat-icon> Submit Quiz
+            </button>
+          </div>
+        </div>
+
+        <!-- RIGHT: All questions -->
+        <div class="questions-col">
+          @for (q of questions; track q.id; let i = $index) {
+            <div class="question-card"
+              [id]="'q' + i"
+              [class.answered]="answers[q.id]">
+
+              <!-- Question header -->
+              <div class="qh">
+                <div class="qh-left">
+                  <span class="q-num">Q{{ i + 1 }}</span>
+                  <span class="q-pts">{{ q.points }} pt{{ q.points > 1 ? 's' : '' }}</span>
+                  <span class="q-diff" [class]="q.difficulty.toLowerCase()">{{ q.difficulty }}</span>
+                  @if (q.topic) {
+                    <span class="q-topic">{{ q.topic }}</span>
+                  }
+                </div>
+                @if (answers[q.id]) {
+                  <mat-icon class="answered-icon">check_circle</mat-icon>
+                }
+              </div>
+
+              <!-- Question text -->
+              <p class="q-text">{{ q.questionText }}</p>
+
+              <!-- MCQ Options -->
+              @if (q.questionType === 'MCQ') {
+                <div class="options">
+                  @for (opt of getOptions(q); track opt.value) {
+                    <div class="option"
+                      [class.selected]="answers[q.id] === opt.value"
+                      (click)="selectAnswer(q.id, opt.value)">
+                      <div class="opt-label" [class.selected]="answers[q.id] === opt.value">{{ opt.label }}</div>
+                      <span class="opt-text">{{ opt.text }}</span>
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- True / False -->
+              @if (q.questionType === 'TRUE_FALSE') {
+                <div class="tf-row">
+                  <button class="tf-btn true-btn" [class.selected]="answers[q.id] === 'TRUE'"
+                    (click)="selectAnswer(q.id, 'TRUE')">
+                    <mat-icon>check</mat-icon> True
+                  </button>
+                  <button class="tf-btn false-btn" [class.selected]="answers[q.id] === 'FALSE'"
+                    (click)="selectAnswer(q.id, 'FALSE')">
+                    <mat-icon>close</mat-icon> False
+                  </button>
+                </div>
+              }
+
+              <!-- Hint -->
+              @if (q.hint) {
+                <div class="hint-toggle" (click)="toggleHint(i)">
+                  <mat-icon>lightbulb</mat-icon>
+                  {{ shownHints[i] ? 'Hide Hint' : 'Show Hint' }}
+                </div>
+              }
+              @if (q.hint && shownHints[i]) {
+                <div class="hint-box">
+                  <mat-icon>lightbulb</mat-icon> {{ q.hint }}
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Bottom submit -->
+          <div class="bottom-submit">
+            <div class="bs-info">
+              <mat-icon>info</mat-icon>
+              {{ questions.length - answeredCount }} question{{ questions.length - answeredCount !== 1 ? 's' : '' }} unanswered
+            </div>
+            <button class="submit-big-btn" (click)="confirmSubmit()">
+              <mat-icon>send</mat-icon> Submit Quiz
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- ── RESULTS ── -->
+  @if (quizCompleted && result) {
+    <div class="results-wrap">
+      <div class="results-card">
+
+        <div class="rc-header" [class.passed]="result.passed" [class.failed]="!result.passed">
+          <div class="rc-icon">{{ result.passed ? '🏆' : '📚' }}</div>
+          <h1>{{ result.passed ? 'Congratulations!' : 'Keep Practicing!' }}</h1>
+          <p>{{ result.passed ? 'You passed the quiz!' : 'Score ' + quiz!.passScore + '% or more to pass.' }}</p>
+        </div>
+
+        <div class="rc-score">
+          <div class="score-ring" [class.passed]="result.passed">
+            <svg viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#f0f0f0" stroke-width="10"/>
+              <circle cx="60" cy="60" r="50" fill="none"
+                [attr.stroke]="result.passed ? '#22c55e' : '#f59e0b'"
+                stroke-width="10" stroke-linecap="round"
+                [attr.stroke-dasharray]="314"
+                [attr.stroke-dashoffset]="314 - (314 * result.score / 100)"
+                transform="rotate(-90 60 60)"/>
+            </svg>
+            <div class="ring-text">
+              <div class="ring-score">{{ result.score }}%</div>
+              <div class="ring-label">Score</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rc-stats">
+          <div class="rstat">
+            <mat-icon class="green">check_circle</mat-icon>
+            <span class="rv">{{ result.correctAnswers }}</span>
+            <span class="rl">Correct</span>
+          </div>
+          <div class="rstat">
+            <mat-icon class="red">cancel</mat-icon>
+            <span class="rv">{{ result.totalQuestions - result.correctAnswers }}</span>
+            <span class="rl">Wrong</span>
+          </div>
+          <div class="rstat">
+            <mat-icon class="blue">timer</mat-icon>
+            <span class="rv">{{ formatTime(result.timeTakenSeconds) }}</span>
+            <span class="rl">Time</span>
+          </div>
+          <div class="rstat">
+            <mat-icon class="purple">bolt</mat-icon>
+            <span class="rv">+{{ result.xpEarned }}</span>
+            <span class="rl">XP Earned</span>
+          </div>
+        </div>
+
+        <div class="rc-actions">
+          <a routerLink="/quiz" class="rc-btn outline">
+            <mat-icon>arrow_back</mat-icon> All Quizzes
+          </a>
+          <button class="rc-btn primary" (click)="retryQuiz()">
+            <mat-icon>refresh</mat-icon> Retry
+          </button>
+          <a routerLink="/dashboard" class="rc-btn outline">
+            <mat-icon>dashboard</mat-icon> Dashboard
+          </a>
+        </div>
+
+      </div>
+    </div>
+  }
+  `,
+  styles: [`
+    /* ── WRAP ── */
+    .quiz-wrap { min-height: 100vh; background: var(--bg); }
+
+    /* ── STICKY BAR ── */
+    .sticky-bar {
+      position: sticky; top: 64px; z-index: 100;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      display: flex; align-items: center; gap: 16px; padding: 12px 24px;
+      transition: background 0.3s;
+      &.warn   { background: rgba(245,158,11,0.1); border-bottom-color: #fcd34d; }
+      &.danger { background: rgba(239,68,68,0.1); border-bottom-color: #fca5a5; }
+    }
+    .back-btn {
+      width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-secondary); text-decoration: none; transition: all 0.2s; flex-shrink: 0;
+      mat-icon { font-size: 20px; width: 20px; height: 20px; }
+      &:hover { border-color: #667eea; color: #667eea; background: rgba(102,126,234,0.1); }
+    }
+    .sb-left { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .sb-title { font-size: 15px; font-weight: 800; color: var(--text-primary); }
+    .sb-sub { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .diff-pill { padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;
+      &.beginner     { background: #dcfce7; color: #16a34a; }
+      &.intermediate { background: #fef3c7; color: #d97706; }
+      &.advanced     { background: #fce7f3; color: #be185d; }
+      &.expert       { background: #ede9fe; color: #7c3aed; }
+    }
+    :host-context(.dark-theme) .diff-pill {
+      &.beginner     { background: rgba(34,197,94,0.15); color: #4ade80; }
+      &.intermediate { background: rgba(245,158,11,0.15); color: #fbbf24; }
+      &.advanced     { background: rgba(236,72,153,0.15); color: #f472b6; }
+      &.expert       { background: rgba(124,58,237,0.15); color: #a78bfa; }
+    }
+    .sb-center { flex: 1; }
+    .progress-track { height: 6px; background: var(--border); border-radius: 6px; overflow: hidden;
+      .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 6px; transition: width 0.4s ease; }
+    }
+    .sb-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .timer { display: flex; align-items: center; gap: 6px; font-size: 20px; font-weight: 800; color: #667eea;
+      mat-icon { font-size: 20px; width: 20px; height: 20px; }
+      &.warn   { color: #d97706; }
+      &.danger { color: #ef4444; animation: pulse 1s infinite; }
+    }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .submit-top-btn {
+      display: flex; align-items: center; gap: 6px;
+      background: linear-gradient(135deg, #667eea, #764ba2); color: white;
+      border: none; border-radius: 10px; padding: 8px 16px;
+      font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer;
+      transition: all 0.2s;
+      mat-icon { font-size: 16px; width: 16px; height: 16px; }
+      &:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(102,126,234,0.35); }
+    }
+
+    /* ── BODY LAYOUT ── */
+    .quiz-body {
+      display: grid; grid-template-columns: 260px 1fr; gap: 24px;
+      max-width: 1200px; margin: 0 auto; padding: 28px 24px 60px;
+      @media (max-width: 900px) { grid-template-columns: 1fr; }
+    }
+
+    /* ── PALETTE ── */
+    .palette-col { @media (max-width: 900px) { display: none; } }
+    .palette-card {
+      position: sticky; top: 132px;
+      background: var(--surface); border-radius: 18px; padding: 20px;
+      border: 1.5px solid var(--border); box-shadow: var(--shadow-sm);
+    }
+    .palette-title { font-size: 12px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-muted); margin-bottom: 14px;
+    }
+    .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 12px; }
+    .pq-btn {
+      width: 100%; aspect-ratio: 1; border-radius: 8px; border: 1.5px solid var(--border);
+      background: var(--surface); font-size: 12px; font-weight: 700; color: var(--text-secondary); cursor: pointer;
+      transition: all 0.15s;
+      &.answered { background: #667eea; border-color: #667eea; color: white; }
+      &.active   { border-color: #764ba2; transform: scale(1.1); }
+      &:hover:not(.answered) { border-color: #667eea; color: #667eea; }
+    }
+    .palette-legend { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-secondary); margin-bottom: 16px;
+      .leg { width: 12px; height: 12px; border-radius: 4px; border: 1.5px solid var(--border); display: inline-block;
+        &.answered { background: #667eea; border-color: #667eea; }
+      }
+    }
+    .palette-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;
+      .ps-item { border-radius: 10px; padding: 12px; text-align: center;
+        .ps-num { display: block; font-size: 22px; font-weight: 900; }
+        .ps-lbl { font-size: 11px; color: var(--text-muted); }
+        &.green { background: rgba(34,197,94,0.1); .ps-num { color: #16a34a; } }
+        &.gray  { background: var(--bg-secondary); .ps-num { color: var(--text-primary); } }
+      }
+    }
+    .submit-side-btn {
+      width: 100%; height: 44px; border: none; border-radius: 12px; cursor: pointer;
+      background: linear-gradient(135deg, #667eea, #764ba2); color: white;
+      font-size: 14px; font-weight: 700; font-family: inherit;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all 0.2s;
+      mat-icon { font-size: 18px; width: 18px; height: 18px; }
+      &:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(102,126,234,0.35); }
+    }
+
+    /* ── QUESTION CARDS ── */
+    .questions-col { display: flex; flex-direction: column; gap: 16px; }
+    .question-card {
+      background: var(--surface); border-radius: 18px; padding: 28px;
+      border: 2px solid var(--border); transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: var(--shadow-sm);
+      &.answered { border-color: #667eea; }
+      &:hover { box-shadow: 0 4px 16px rgba(102,126,234,0.1); }
+    }
+    .qh { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .qh-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .q-num  { font-size: 16px; font-weight: 900; color: #667eea; }
+    .q-pts  { background: rgba(102,126,234,0.12); color: #667eea; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .q-diff { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+      &.beginner     { background: #dcfce7; color: #16a34a; }
+      &.intermediate { background: #fef3c7; color: #d97706; }
+      &.advanced     { background: #fce7f3; color: #be185d; }
+    }
+    :host-context(.dark-theme) .q-diff {
+      &.beginner     { background: rgba(34,197,94,0.15); color: #4ade80; }
+      &.intermediate { background: rgba(245,158,11,0.15); color: #fbbf24; }
+      &.advanced     { background: rgba(236,72,153,0.15); color: #f472b6; }
+    }
+    .q-topic { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+    .answered-icon { color: #667eea; font-size: 22px; width: 22px; height: 22px; }
+    .q-text { font-size: 17px; font-weight: 600; line-height: 1.65; color: var(--text-primary); margin: 0 0 22px; }
+
+    /* ── OPTIONS ── */
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option {
+      display: flex; align-items: center; gap: 14px; padding: 14px 18px;
+      border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.18s;
+      &:hover:not(.selected) { border-color: #a5b4fc; background: rgba(102,126,234,0.05); }
+      &.selected { border-color: #667eea; background: rgba(102,126,234,0.1); }
+    }
+    .opt-label {
+      width: 32px; height: 32px; border-radius: 10px; background: var(--bg-secondary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 800; color: var(--text-secondary); flex-shrink: 0; transition: all 0.18s;
+      &.selected { background: #667eea; color: white; }
+    }
+    .opt-text { font-size: 15px; color: var(--text-secondary); line-height: 1.5; }
+
+    /* ── TRUE/FALSE ── */
+    .tf-row { display: flex; gap: 14px; }
+    .tf-btn {
+      flex: 1; height: 56px; border-radius: 12px; border: 2px solid var(--border);
+      background: var(--surface); font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit;
+      color: var(--text-primary);
+      display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.18s;
+      mat-icon { font-size: 20px; width: 20px; height: 20px; }
+      &:hover { border-color: #a5b4fc; background: rgba(102,126,234,0.05); }
+      &.selected { border-color: #667eea; background: rgba(102,126,234,0.1); color: #667eea; }
+    }
+    .true-btn.selected  { border-color: #22c55e; background: rgba(34,197,94,0.1); color: #16a34a; }
+    .false-btn.selected { border-color: #ef4444; background: rgba(239,68,68,0.1); color: #dc2626; }
+
+    /* ── HINT ── */
+    .hint-toggle {
+      display: inline-flex; align-items: center; gap: 6px; margin-top: 16px;
+      font-size: 13px; font-weight: 600; color: #f59e0b; cursor: pointer;
+      mat-icon { font-size: 16px; width: 16px; height: 16px; }
+      &:hover { color: #d97706; }
+    }
+    .hint-box {
+      display: flex; align-items: flex-start; gap: 10px; margin-top: 10px;
+      background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.4); border-radius: 10px; padding: 14px 16px;
+      font-size: 14px; color: var(--text-secondary); line-height: 1.6;
+      mat-icon { color: #f59e0b; flex-shrink: 0; }
+    }
+
+    /* ── BOTTOM SUBMIT ── */
+    .bottom-submit {
+      background: var(--surface); border-radius: 18px; padding: 24px 28px;
+      border: 2px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .bs-info { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-secondary);
+      mat-icon { font-size: 18px; width: 18px; height: 18px; color: var(--text-muted); }
+    }
+    .submit-big-btn {
+      display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 28px;
+      background: linear-gradient(135deg, #667eea, #764ba2); color: white;
+      border: none; border-radius: 12px; font-size: 15px; font-weight: 700;
+      font-family: inherit; cursor: pointer; transition: all 0.2s;
+      mat-icon { font-size: 20px; width: 20px; height: 20px; }
+      &:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(102,126,234,0.4); }
+    }
+
+    /* ── RESULTS ── */
+    .results-wrap {
+      min-height: calc(100vh - 64px); display: flex; align-items: center; justify-content: center;
+      padding: 40px 24px; background: var(--bg);
+    }
+    .results-card {
+      width: 100%; max-width: 560px; background: var(--surface); border-radius: 28px; overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+    }
+    .rc-header { padding: 40px 32px; text-align: center; color: white;
+      &.passed { background: linear-gradient(135deg, #22c55e, #16a34a); }
+      &.failed { background: linear-gradient(135deg, #f59e0b, #d97706); }
+      .rc-icon { font-size: 64px; margin-bottom: 12px; }
+      h1 { font-size: 30px; font-weight: 900; margin: 0 0 8px; }
+      p  { opacity: 0.9; margin: 0; font-size: 15px; }
+    }
+    .rc-score { display: flex; justify-content: center; padding: 32px 32px 16px; }
+    .score-ring { position: relative; width: 140px; height: 140px;
+      svg { width: 100%; height: 100%; }
+      .ring-text {
+        position: absolute; inset: 0; display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        .ring-score { font-size: 34px; font-weight: 900; color: var(--text-primary); }
+        .ring-label { font-size: 12px; color: var(--text-muted); }
+      }
+    }
+    .rc-stats { display: flex; gap: 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      .rstat { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px 12px;
+        border-right: 1px solid var(--border); &:last-child { border-right: none; }
+        mat-icon { font-size: 22px; width: 22px; height: 22px; margin-bottom: 6px;
+          &.green  { color: #22c55e; } &.red { color: #ef4444; }
+          &.blue   { color: #3b82f6; } &.purple { color: #8b5cf6; }
+        }
+        .rv { font-size: 22px; font-weight: 900; color: var(--text-primary); }
+        .rl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+      }
+    }
+    .rc-actions { display: flex; gap: 10px; padding: 24px 28px; flex-wrap: wrap;
+      .rc-btn {
+        flex: 1; min-width: 100px; height: 46px; border-radius: 12px; cursor: pointer;
+        font-size: 14px; font-weight: 700; font-family: inherit;
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+        text-decoration: none; transition: all 0.2s;
+        mat-icon { font-size: 18px; width: 18px; height: 18px; }
+        &.primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none;
+          &:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(102,126,234,0.35); }
+        }
+        &.outline { background: var(--surface); color: var(--text-primary); border: 2px solid var(--border);
+          &:hover { border-color: #667eea; color: #667eea; }
+        }
+      }
+    }
+  `]
+})
+export class QuizAttemptComponent implements OnInit, OnDestroy {
+  quiz: Quiz | null = null;
+  questions: Question[] = [];
+  answers: Record<number, string> = {};
+  timeLeft = 1800;
+  shownHints: boolean[] = [];
+  quizCompleted = false;
+  result: any = null;
+  activeQ = 0;
+  private timerSub?: Subscription;
+
+  constructor(private route: ActivatedRoute,
+    private apiService: ApiService, private snackBar: MatSnackBar) {}
+
+  ngOnInit(): void {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.loadQuiz(id);
+  }
+
+  ngOnDestroy(): void { this.timerSub?.unsubscribe(); }
+
+  get answeredCount(): number { return Object.keys(this.answers).length; }
+
+  getOptions(q: Question): { label: string; value: string; text: string }[] {
+    return [
+      { label: 'A', value: 'A', text: q.optionA || '' },
+      { label: 'B', value: 'B', text: q.optionB || '' },
+      { label: 'C', value: 'C', text: q.optionC || '' },
+      { label: 'D', value: 'D', text: q.optionD || '' },
+    ].filter(o => o.text);
+  }
+
+  selectAnswer(qId: number, value: string): void {
+    this.answers[qId] = value;
+    const idx = this.questions.findIndex(q => q.id === qId);
+    if (idx !== -1) this.activeQ = idx;
+  }
+
+  toggleHint(i: number): void { this.shownHints[i] = !this.shownHints[i]; }
+
+  scrollTo(i: number): void {
+    this.activeQ = i;
+    const el = document.getElementById('q' + i);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  confirmSubmit(): void {
+    const unanswered = this.questions.length - this.answeredCount;
+    if (unanswered > 0) {
+      const ok = window.confirm(`You have ${unanswered} unanswered question${unanswered > 1 ? 's' : ''}. Submit anyway?`);
+      if (!ok) return;
+    }
+    this.submitQuiz();
+  }
+
+  submitQuiz(): void {
+    this.timerSub?.unsubscribe();
+    const timeTaken = (this.quiz?.timeLimitMinutes || 30) * 60 - this.timeLeft;
+
+    this.apiService.submitQuiz(this.quiz!.id, this.answers).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.result = { ...res.data, timeTakenSeconds: timeTaken };
+          this.quizCompleted = true;
+        } else {
+          this.computeLocalResult(timeTaken);
+        }
+      },
+      error: () => this.computeLocalResult(timeTaken)
+    });
+  }
+
+  retryQuiz(): void {
+    this.answers = {};
+    this.shownHints = [];
+    this.quizCompleted = false;
+    this.result = null;
+    this.activeQ = 0;
+    this.timeLeft = (this.quiz?.timeLimitMinutes || 30) * 60;
+    this.startTimer();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  formatTime(secs: number): string {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m}:${String(s).padStart(2, '0')}`;
+  }
+
+  private loadQuiz(id: number): void {
+    this.apiService.getQuiz(id).subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.quiz = res.data;
+          this.timeLeft = res.data.timeLimitMinutes * 60;
+          this.loadQuestions(id);
+        } else {
+          this.useStaticData(id);
+        }
+      },
+      error: () => this.useStaticData(id)
+    });
+  }
+
+  private loadQuestions(quizId: number): void {
+    this.apiService.getQuizQuestions(quizId).subscribe({
+      next: (res) => {
+        if (res.success && res.data?.length > 0) {
+          this.questions = res.data;
+        } else {
+          this.questions = getStaticQuestions(quizId);
+        }
+        this.shownHints = new Array(this.questions.length).fill(false);
+        this.startTimer();
+      },
+      error: () => {
+        this.questions = getStaticQuestions(quizId);
+        this.shownHints = new Array(this.questions.length).fill(false);
+        this.startTimer();
+      }
+    });
+  }
+
+  private useStaticData(id: number): void {
+    this.quiz = getStaticQuiz(id);
+    this.timeLeft = this.quiz.timeLimitMinutes * 60;
+    this.questions = getStaticQuestions(id);
+    this.shownHints = new Array(this.questions.length).fill(false);
+    this.startTimer();
+  }
+
+  private computeLocalResult(timeTaken: number): void {
+    const correct = this.questions.filter(q => this.answers[q.id] === q.correctAnswer).length;
+    const total = this.questions.length;
+    const score = Math.round((correct / total) * 100);
+    const xp = correct * (this.questions[0]?.points ?? 1) * 10;
+    this.result = {
+      score, correctAnswers: correct, totalQuestions: total,
+      passed: score >= (this.quiz?.passScore ?? 70),
+      xpEarned: xp, timeTakenSeconds: timeTaken
+    };
+    this.quizCompleted = true;
+  }
+
+  private startTimer(): void {
+    this.timerSub?.unsubscribe();
+    this.timerSub = interval(1000).subscribe(() => {
+      this.timeLeft--;
+      if (this.timeLeft <= 0) {
+        this.snackBar.open('Time is up! Submitting...', 'Close', { duration: 3000 });
+        this.submitQuiz();
+      }
+    });
+  }
+}

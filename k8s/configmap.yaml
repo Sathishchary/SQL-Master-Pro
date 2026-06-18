@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smp-config
+  namespace: sql-master-pro
+data:
+  SPRING_PROFILES_ACTIVE: "prod"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-service:5432/sqlmasterpro"
+  SPRING_DATASOURCE_USERNAME: "smpuser"
+  JWT_EXPIRATION: "86400000"
+  JWT_REFRESH_EXPIRATION: "604800000"
+  SPRING_MAIL_HOST: "smtp.gmail.com"
+  SPRING_MAIL_PORT: "587"
+  SQL_MAX_ROWS: "500"
+  SQL_QUERY_TIMEOUT: "30"

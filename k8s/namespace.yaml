@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sql-master-pro
+  labels:
+    app: sql-master-pro
+    environment: production

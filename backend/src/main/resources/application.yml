@@ -1,0 +1,127 @@
+spring:
+  application:
+    name: sql-master-pro
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:SQLMasterPro}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASS:root}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        default_schema: public
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USER:noreply@sqlmasterpro.com}
+    password: ${MAIL_PASS:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=600s
+
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain
+  tomcat:
+    max-threads: 200
+    min-spare-threads: 10
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+
+razorpay:
+  key-id: ${RAZORPAY_KEY_ID:}
+  key-secret: ${RAZORPAY_KEY_SECRET:}
+  webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
+
+app:
+  base-url: ${APP_BASE_URL:http://localhost:4200}
+  api-url: ${APP_API_URL:http://localhost:8080}
+  frontend-url: ${FRONTEND_URL:http://localhost:4200}
+  upi-id: ${UPI_ID:sathishcharykotha@okaxis}
+  upi-name: ${UPI_NAME:SQL+Master+Pro}
+
+  # SQL Execution sandbox config
+  sql-execution:
+    max-query-length: 5000
+    timeout-seconds: 10
+    max-rows: 1000
+    allowed-databases:
+      - employee_db
+      - ecommerce_db
+      - hospital_db
+      - banking_db
+      - school_db
+      - inventory_db
+      - movies_db
+
+  # Plans
+  subscription:
+    basic-price-inr: 499
+    pro-price-inr: 999
+    enterprise-price-inr: 2999
+    basic-price-yearly-inr: 4999
+    pro-price-yearly-inr: 9999
+    enterprise-price-yearly-inr: 24999
+
+logging:
+  level:
+    "[com.sqlmasterpro]": INFO
+    "[org.springframework.security]": WARN
+    "[org.hibernate.SQL]": WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: ${SWAGGER_ENABLED:false}
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    enabled: ${SWAGGER_ENABLED:false}
+  info:
+    title: SQL Master Pro API
+    version: 1.0.0
+    description: Complete SQL Learning Platform REST API

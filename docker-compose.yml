@@ -1,0 +1,94 @@
+version: '3.9'
+
+services:
+
+  # ─── PostgreSQL Database ───────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: smp_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sqlmasterpro
+      POSTGRES_USER: smpuser
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-smppassword}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/seed-data.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smpuser -d sqlmasterpro"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - smp_network
+
+  # ─── Spring Boot Backend ───────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/backend/Dockerfile
+    container_name: smp_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sqlmasterpro
+      SPRING_DATASOURCE_USERNAME: smpuser
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-smppassword}
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-very-long-secret-key}
+      JWT_EXPIRATION: 86400000
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-rzp_test_placeholder}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-placeholder}
+      SPRING_MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME:-}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILE:-docker}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 90s
+      retries: 3
+    networks:
+      - smp_network
+
+  # ─── Angular Frontend ──────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/frontend/Dockerfile
+    container_name: smp_frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "80:80"
+    networks:
+      - smp_network
+
+  # ─── Redis Cache (optional) ────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: smp_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - smp_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  smp_network:
+    driver: bridge

@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx ng *)",
+      "PowerShell(& \"psql\" -U postgres -c \"\\\\l\" 2>&1)",
+      "PowerShell(\\(Get-Command mvn -ErrorAction SilentlyContinue\\).Source; \\(Get-Command java -ErrorAction SilentlyContinue\\).Source)",
+      "Bash(dir \"d:/AGENTIC_COURSE/ClaudeAPI/Applications/SQL-Master-Pro/frontend/src/app/features\")",
+      "Bash(xargs ls -la)",
+      "Bash(xargs grep -l \"OAuth\\\\|oauth2\\\\|@ConfigurationProperties\")",
+      "Bash(xargs -I{} sh -c 'echo ==={}===; cat {}')",
+      "Bash(mvn -q test)",
+      "PowerShell(Test-NetConnection -ComputerName localhost -Port 5432 -WarningAction SilentlyContinue)",
+      "PowerShell(Get-Command psql -ErrorAction SilentlyContinue)",
+      "Bash(export PGPASSWORD=root)",
+      "Bash(\"/c/Program Files/PostgreSQL/16/bin/psql.exe\" -h localhost -U postgres -d SQLMasterPro -f \"/d/AGENTIC_COURSE/ClaudeAPI/Applications/SQL-Master-Pro/database/seed-data.sql\")",
+      "Bash(\"/c/Program Files/PostgreSQL/16/bin/psql.exe\" -h localhost -U postgres -d SQLMasterPro -c \"\\\\d courses\")",
+      "Bash(\"/c/Program Files/PostgreSQL/16/bin/psql.exe\" -h localhost -U postgres -d SQLMasterPro -c \"\\\\d questions\")",
+      "Bash(cd /d/AGENTIC_COURSE/ClaudeAPI/Applications/SQL-Master-Pro/backend/src/main/java/com/sqlmasterpro/model/entity && grep -n \"is_premium\\\\|is_published\\\\|@Column\\(name\" Blog.java Challenge.java Question.java Quiz.java Lesson.java)",
+      "Read(//d/d/AGENTIC_COURSE/ClaudeAPI/Applications/SQL-Master-Pro/backend/src/main/java/com/sqlmasterpro/model/entity/**)",
+      "Bash(\"/c/Program Files/PostgreSQL/16/bin/psql.exe\" -h localhost -U postgres -d SQLMasterPro -c \"\\\\d ecommerce_db.products\" -c \"\\\\d quizzes\" -c \"\\\\d challenges\" -c \"\\\\d lessons\")",
+      "Bash(sed -i \"27,77 s/'#\\\\\\([0-9a-zA-Z]*\\\\\\)', TRUE\\)/'#\\\\1', TRUE, FALSE\\)/\" seed-data.sql)",
+      "Read(//d/d/AGENTIC_COURSE/ClaudeAPI/Applications/SQL-Master-Pro/database/**)",
+      "Bash(cd \"/d/AGENTIC_COURSE/ClaudeAPI/Applications/SQL-Master-Pro/frontend/src/app\" && find . -maxdepth 2 -type d)",
+      "Read(//d/d/AGENTIC_COURSE/ClaudeAPI/Applications/SQL-Master-Pro/frontend/src/**)",
+      "Bash(curl -s -i -X PATCH http://localhost:8080/api/sql/executions/1151/save -H 'Content-Type: application/json' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJkYXRhZ2xhbmNlQHRlc3QuY29tIiwidXNlcm5hbWUiOiJkYXRhZ2xhbmNlIiwicm9sZXMiOiIiLCJpYXQiOjE3ODE3MTAxMjUsImV4cCI6MTc4MTc5NjUyNX0.1FA6etpIhdqhoIA9wfuZokZkRNnj0ifqe-Z5K8lzOYseS4E2cP_U0MGlxPzFFjfKUl76IQsI7hOzTnjuh2ZjMA' -d '{\"saved\":true,\"name\":null}')"
+    ]
+  }
+}
