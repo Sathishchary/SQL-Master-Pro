@@ -1,10 +1,12 @@
 package com.sqlmasterpro.controller;
 
+import com.sqlmasterpro.model.dto.request.AdminCreateUserRequest;
 import com.sqlmasterpro.model.dto.response.ApiResponse;
 import com.sqlmasterpro.model.entity.*;
 import com.sqlmasterpro.service.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,11 +37,24 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success(adminService.getUsers(pageable)));
     }
 
+    @PostMapping("/users")
+    @Operation(summary = "Create a new user")
+    public ResponseEntity<ApiResponse<User>> createUser(@Valid @RequestBody AdminCreateUserRequest request) {
+        return ResponseEntity.ok(ApiResponse.success("User created", adminService.createUser(request)));
+    }
+
     @DeleteMapping("/users/{id}")
     @Operation(summary = "Deactivate user")
     public ResponseEntity<ApiResponse<Void>> deactivateUser(@PathVariable Long id) {
         adminService.deactivateUser(id);
         return ResponseEntity.ok(ApiResponse.success("User deactivated", null));
+    }
+
+    @PutMapping("/users/{id}/activate")
+    @Operation(summary = "Reactivate a deactivated user")
+    public ResponseEntity<ApiResponse<Void>> activateUser(@PathVariable Long id) {
+        adminService.activateUser(id);
+        return ResponseEntity.ok(ApiResponse.success("User activated", null));
     }
 
     @GetMapping("/payments")

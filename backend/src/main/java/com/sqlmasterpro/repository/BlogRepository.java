@@ -4,6 +4,7 @@ import com.sqlmasterpro.model.entity.Blog;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,4 +19,8 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
     List<Blog> findByPublishedTrueAndFeaturedTrue();
 
     Page<Blog> findByPublishedTrueAndTitleContainingIgnoreCase(String keyword, Pageable pageable);
+
+    @Query(value = "SELECT b FROM Blog b LEFT JOIN FETCH b.author",
+        countQuery = "SELECT COUNT(b) FROM Blog b")
+    Page<Blog> findAllWithAuthor(Pageable pageable);
 }

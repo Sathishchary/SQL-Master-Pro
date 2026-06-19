@@ -1,18 +1,23 @@
 package com.sqlmasterpro.service.impl;
 
+import com.sqlmasterpro.exception.BadRequestException;
 import com.sqlmasterpro.exception.ResourceNotFoundException;
+import com.sqlmasterpro.model.dto.request.AdminCreateUserRequest;
 import com.sqlmasterpro.model.entity.*;
 import com.sqlmasterpro.repository.*;
 import com.sqlmasterpro.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +25,8 @@ import java.util.Map;
 public class AdminServiceImpl implements AdminService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
     private final CourseRepository courseRepository;
     private final QuizRepository quizRepository;
     private final ChallengeRepository challengeRepository;
@@ -52,10 +59,45 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional
+    public User createUser(AdminCreateUserRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new BadRequestException("Email is already registered");
+        }
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new BadRequestException("Username is already taken");
+        }
+
+        Role role = roleRepository.findByName(request.getRole())
+            .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + request.getRole()));
+
+        User user = User.builder()
+            .username(request.getUsername())
+            .email(request.getEmail())
+            .password(passwordEncoder.encode(request.getPassword()))
+            .firstName(request.getFirstName())
+            .lastName(request.getLastName())
+            .emailVerified(true)
+            .roles(new HashSet<>(Set.of(role)))
+            .build();
+
+        return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
     public void deactivateUser(Long id) {
         User user = userRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         user.setActive(false);
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void activateUser(Long id) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        user.setActive(true);
         userRepository.save(user);
     }
 

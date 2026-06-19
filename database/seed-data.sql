@@ -10,10 +10,10 @@ INSERT INTO roles (name, description) VALUES
 ON CONFLICT (name) DO NOTHING;
 
 -- ─── ADMIN USER ──────────────────────────────────────────────
--- password: Admin@123 (bcrypt strength 12)
+-- password: admin123 (bcrypt strength 12) — matches the login page's quick-access hint
 INSERT INTO users (username, email, password, first_name, last_name, email_verified, active, subscription_plan)
 VALUES ('admin', 'admin@sqlmasterpro.com',
-        '$2a$12$LXy8BCPIm1N7UhbEkuq6Mev5H7U3e7Xo0Rrn5Qb5ySf2aDEV6PFm',
+        '$2b$12$yosUzoTcx0aIJYnSiiPSX.FdvKpK29eppSPonNsdMI9DbnAXxAd3m',
         'Admin', 'User', TRUE, TRUE, 'ENTERPRISE')
 ON CONFLICT (username) DO NOTHING;
 
@@ -373,8 +373,69 @@ INSERT INTO blogs (title, slug, excerpt, content, category, tags, reading_time_m
 ('Top 50 SQL Interview Questions for FAANG',
  'top-50-sql-interview-questions-faang',
  'Prepare for technical interviews at top companies with these 50 most-asked SQL interview questions with detailed answers.',
- '<h2>SQL Interview Preparation</h2><p>These questions are commonly asked at Google, Amazon, Meta, Apple, and Netflix.</p><h3>Q1: What is the difference between DELETE, TRUNCATE, and DROP?</h3><ul><li><strong>DELETE</strong>: Removes specific rows; logged; can be rolled back</li><li><strong>TRUNCATE</strong>: Removes all rows; minimal logging; faster</li><li><strong>DROP</strong>: Removes the entire table including structure</li></ul>',
- 'Interview Questions', 'interview,faang,google,amazon,sql questions', 20, TRUE, TRUE, NOW() - INTERVAL '1 day'),
+ '<h2>SQL Interview Preparation</h2><p>These questions are commonly asked at Google, Amazon, Meta, Apple, and Netflix. We have organized 30 of the most frequently tested questions into six topic areas so you can study them systematically before your next interview.</p>
+<h3>Question Distribution by Topic</h3>
+<pre>Joins &amp; Subqueries      ###################### 6
+Indexes &amp; Performance   ###################### 6
+Aggregation &amp; GROUP BY  ################# 5
+Window Functions        ################# 5
+Transactions &amp; Locking  ############# 4
+Database Design         ############# 4</pre>
+<h2>Part 1: SQL Fundamentals</h2>
+<h3>Q1: What is the difference between DELETE, TRUNCATE, and DROP?</h3><ul><li><strong>DELETE</strong>: Removes specific rows; logged; can be rolled back</li><li><strong>TRUNCATE</strong>: Removes all rows; minimal logging; faster</li><li><strong>DROP</strong>: Removes the entire table including structure</li></ul>
+<h3>Q2: What is the difference between WHERE and HAVING?</h3><p>WHERE filters individual rows before any grouping happens. HAVING filters groups after a GROUP BY aggregation runs, so it is the only place you can reference an aggregate function like SUM or COUNT in a filter condition.</p>
+<h3>Q3: How does a PRIMARY KEY differ from a UNIQUE KEY?</h3><ul><li>A table can have only one PRIMARY KEY but many UNIQUE KEYs</li><li>PRIMARY KEY columns cannot contain NULL; UNIQUE KEY columns can contain one NULL per row</li><li>PRIMARY KEY is typically used as the main row identifier referenced by foreign keys</li></ul>
+<h3>Q4: How does CHAR differ from VARCHAR?</h3><p>CHAR is fixed-length and pads short values with spaces, while VARCHAR is variable-length and stores only the characters provided. VARCHAR is usually more storage-efficient for text that varies in length.</p>
+<h3>Q5: Why does NULL behave differently from zero or an empty string?</h3><p>NULL represents an unknown or missing value, so any comparison or arithmetic involving NULL evaluates to NULL rather than TRUE or FALSE. Use IS NULL, IS NOT NULL, or COALESCE instead of the equality operator to test for it.</p>
+<h2>Part 2: Joins and Subqueries</h2>
+<h3>Q6: What is the difference between INNER, LEFT, RIGHT, and FULL OUTER JOIN?</h3>
+<pre>INNER JOIN        LEFT JOIN         FULL OUTER JOIN
+   A   B             A   B               A   B
+  ( + )           ( +++   )           ( ++++++ )
+   overlap          all of A          all rows from
+   only             + overlap         both sides</pre>
+<p>INNER JOIN keeps only rows with a match in both tables. LEFT JOIN keeps every row from the left table and fills unmatched right-side columns with NULL. RIGHT JOIN is the mirror image. FULL OUTER JOIN keeps every row from both tables, matching where possible.</p>
+<h3>Q7: When would you use a subquery instead of a JOIN?</h3><p>Use a subquery when you need a single derived value or a filtered set for one comparison, such as WHERE salary &gt; (SELECT AVG(salary) FROM employees). Use a JOIN when you need to return columns from multiple tables together.</p>
+<h3>Q8: What is the difference between a correlated and a non-correlated subquery?</h3><p>A non-correlated subquery executes once, independently of the outer query. A correlated subquery references a column from the outer row and re-executes once per outer row, which can be expensive on large tables.</p>
+<h3>Q9: How do you write a self join?</h3><pre>SELECT e.first_name AS employee, m.first_name AS manager
+FROM employees e
+LEFT JOIN employees m ON e.manager_id = m.employee_id;</pre>
+<h3>Q10: When should you use EXISTS instead of IN?</h3><p>EXISTS stops scanning as soon as it finds one matching row and handles NULLs more predictably, which usually makes it faster than IN when the subquery returns a large or NULL-containing result set.</p>
+<h2>Part 3: Aggregation and Grouping</h2>
+<h3>Q11: What is the difference between GROUP BY and DISTINCT?</h3><p>DISTINCT removes duplicate rows from the final result set. GROUP BY groups rows so that aggregate functions such as SUM, COUNT, and AVG can be computed per group.</p>
+<h3>Q12: How do you find the department with the second-highest average salary?</h3><pre>SELECT dept_id, avg_salary FROM (
+  SELECT dept_id, AVG(salary) AS avg_salary,
+         DENSE_RANK() OVER (ORDER BY AVG(salary) DESC) AS rnk
+  FROM employees GROUP BY dept_id
+) ranked WHERE rnk = 2;</pre>
+<h3>Q13: What is the difference between COUNT(*) and COUNT(column_name)?</h3><p>COUNT(*) counts every row in the group, including rows where columns are NULL. COUNT(column_name) only counts rows where that specific column is not NULL.</p>
+<h3>Q14: What do ROLLUP and CUBE do?</h3><p>Both extend GROUP BY to add subtotal rows. ROLLUP produces a hierarchical set of subtotals along one dimension. CUBE produces subtotals for every combination of the grouped columns.</p>
+<h3>Q15: Why can you not filter an aggregate with WHERE?</h3><p>WHERE is evaluated before grouping and aggregation happen, so the aggregate value does not exist yet at that stage. HAVING runs after GROUP BY, when the aggregate is available to filter on.</p>
+<h2>Part 4: Window Functions</h2>
+<h3>Q16: What is the difference between ROW_NUMBER, RANK, and DENSE_RANK?</h3><ul><li><strong>ROW_NUMBER</strong>: assigns a unique sequential number, even to ties</li><li><strong>RANK</strong>: gives tied rows the same rank and leaves a gap afterward</li><li><strong>DENSE_RANK</strong>: gives tied rows the same rank with no gap afterward</li></ul>
+<h3>Q17: When would you use LAG or LEAD?</h3><p>LAG and LEAD let you compare a row to a preceding or following row in the same result set, without a self join. They are commonly used for month-over-month growth or detecting changes between consecutive rows.</p>
+<h3>Q18: How do you calculate a running total?</h3><pre>SELECT order_date, amount,
+  SUM(amount) OVER (ORDER BY order_date) AS running_total
+FROM orders;</pre>
+<h3>Q19: What does NTILE do?</h3><p>NTILE(n) divides the ordered rows into n roughly equal-sized buckets, which is useful for percentile, quartile, or decile analysis.</p>
+<h3>Q20: What does PARTITION BY control in a window function?</h3><p>PARTITION BY resets the window calculation independently for each group, similar to GROUP BY, but without collapsing the underlying rows into one per group.</p>
+<h2>Part 5: Indexes and Performance</h2>
+<h3>Q21: What is the difference between a clustered and a non-clustered index?</h3>
+<table><tr><th>Aspect</th><th>Clustered Index</th><th>Non-Clustered Index</th></tr>
+<tr><td>Storage</td><td>Defines the physical row order</td><td>Separate structure with pointers to rows</td></tr>
+<tr><td>Per table</td><td>Only one allowed</td><td>Many allowed</td></tr>
+<tr><td>Lookup speed</td><td>Fastest for range scans</td><td>Fast for selective lookups</td></tr></table>
+<h3>Q22: Can an index ever make queries slower?</h3><p>Indexes speed up reads but slow down writes, since every INSERT, UPDATE, or DELETE must also update each index on the table. Too many indexes on a write-heavy table can hurt overall throughput.</p>
+<h3>Q23: Why does column order matter in a composite index?</h3><p>A composite index can only be used efficiently when the query filters on a leftmost prefix of its columns. An index on (a, b, c) helps queries filtering on a, or a and b, but not one filtering on b alone.</p>
+<h3>Q24: What is the purpose of EXPLAIN ANALYZE?</h3><p>EXPLAIN ANALYZE actually runs the query and shows the real execution plan, including which indexes were used, actual row counts, and time spent in each step, which is essential for diagnosing slow queries.</p>
+<h3>Q25: What is a covering index?</h3><p>A covering index includes every column a query needs, so the database can answer the query directly from the index without reading the underlying table rows.</p>
+<h3>Q26: List three quick wins for optimizing a slow query.</h3><ul><li>Avoid SELECT * and fetch only the columns you need</li><li>Add an index on columns used in WHERE, JOIN, and ORDER BY</li><li>Avoid wrapping indexed columns in functions inside WHERE clauses</li></ul>
+<h2>Part 6: Transactions, Locking, and Design</h2>
+<h3>Q27: What do the ACID properties stand for?</h3><ul><li><strong>Atomicity</strong>: a transaction either fully completes or fully rolls back</li><li><strong>Consistency</strong>: a transaction moves the database from one valid state to another</li><li><strong>Isolation</strong>: concurrent transactions do not interfere with each other</li><li><strong>Durability</strong>: committed changes survive a crash</li></ul>
+<h3>Q28: What is the difference between Read Committed and Serializable isolation?</h3><p>Read Committed only sees data committed before each statement starts, allowing phenomena like non-repeatable reads. Serializable is the strictest level and behaves as if transactions ran one after another, preventing those anomalies at the cost of more blocking.</p>
+<h3>Q29: What causes a deadlock and how can you prevent one?</h3><p>A deadlock happens when two transactions each hold a lock the other needs, so neither can proceed. You can reduce deadlocks by always acquiring locks in a consistent order and keeping transactions short.</p>
+<h3>Q30: What is normalization, and when would you denormalize instead?</h3><p>Normalization organizes data to reduce redundancy, typically up to third normal form (3NF). Denormalization intentionally reintroduces redundancy to avoid expensive joins in read-heavy systems, such as analytics dashboards or reporting tables.</p>',
+ 'Interview Questions', 'interview,faang,google,amazon,sql questions', 35, TRUE, TRUE, NOW() - INTERVAL '1 day'),
 
 ('SQL Query Optimization: 15 Tips to Make Your Queries Faster',
  'sql-query-optimization-tips',

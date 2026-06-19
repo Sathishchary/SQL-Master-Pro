@@ -6,6 +6,7 @@ import com.sqlmasterpro.model.entity.Lesson;
 import com.sqlmasterpro.model.enums.DifficultyLevel;
 import com.sqlmasterpro.repository.CourseRepository;
 import com.sqlmasterpro.repository.LessonRepository;
+import com.sqlmasterpro.repository.QuizRepository;
 import com.sqlmasterpro.service.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class CourseServiceImpl implements CourseService {
 
     private final CourseRepository courseRepository;
     private final LessonRepository lessonRepository;
+    private final QuizRepository quizRepository;
 
     @Override
     public List<Course> getAllCourses() {
@@ -55,5 +57,14 @@ public class CourseServiceImpl implements CourseService {
             .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
         course.setId(id);
         return courseRepository.save(course);
+    }
+
+    @Override
+    @Transactional
+    public void deleteCourse(Long id) {
+        Course course = courseRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        quizRepository.deleteAll(quizRepository.findByCourseId(id));
+        courseRepository.delete(course);
     }
 }

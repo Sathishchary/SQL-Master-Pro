@@ -13,6 +13,7 @@ import java.util.List;
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
 
     List<Quiz> findByCourseIdAndPublishedTrue(Long courseId);
+    List<Quiz> findByCourseId(Long courseId);
     Page<Quiz> findByPublishedTrueAndDifficulty(DifficultyLevel difficulty, Pageable pageable);
     Page<Quiz> findByPublishedTrue(Pageable pageable);
 }

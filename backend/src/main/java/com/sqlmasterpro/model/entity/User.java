@@ -1,5 +1,6 @@
 package com.sqlmasterpro.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sqlmasterpro.model.enums.AuthProvider;
 import com.sqlmasterpro.model.enums.SubscriptionPlan;
 import jakarta.persistence.*;
@@ -35,6 +36,7 @@ public class User {
     @Email @NotBlank
     private String email;
 
+    @JsonIgnore
     @Column(length = 255)
     private String password;
 

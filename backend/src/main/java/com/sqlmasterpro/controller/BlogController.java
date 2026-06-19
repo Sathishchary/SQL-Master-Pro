@@ -2,6 +2,7 @@ package com.sqlmasterpro.controller;
 
 import com.sqlmasterpro.model.dto.response.ApiResponse;
 import com.sqlmasterpro.model.entity.Blog;
+import com.sqlmasterpro.security.UserPrincipal;
 import com.sqlmasterpro.service.BlogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,11 +45,19 @@ public class BlogController {
         return ResponseEntity.ok(ApiResponse.success(blogService.getFeaturedBlogs()));
     }
 
+    @GetMapping("/admin/all")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('INSTRUCTOR')")
+    @Operation(summary = "Get all blogs for admin management, including drafts")
+    public ResponseEntity<ApiResponse<Page<Blog>>> getAllBlogsForAdmin(Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(blogService.getAllBlogsForAdmin(pageable)));
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('INSTRUCTOR')")
     @Operation(summary = "Create blog post")
-    public ResponseEntity<ApiResponse<Blog>> createBlog(@RequestBody Blog blog) {
-        return ResponseEntity.ok(ApiResponse.success("Blog created", blogService.createBlog(blog)));
+    public ResponseEntity<ApiResponse<Blog>> createBlog(@RequestBody Blog blog,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(ApiResponse.success("Blog created", blogService.createBlog(blog, principal.getId())));
     }
 
     @PutMapping("/{id}")

@@ -21,6 +21,7 @@ public class UserPrincipal implements UserDetails {
     private String username;
     private String email;
     private String password;
+    private boolean active;
     private Collection<? extends GrantedAuthority> authorities;
 
     public static UserPrincipal create(User user) {
@@ -33,6 +34,7 @@ public class UserPrincipal implements UserDetails {
             .username(user.getUsername())
             .email(user.getEmail())
             .password(user.getPassword())
+            .active(user.isActive())
             .authorities(authorities)
             .build();
     }
@@ -47,5 +49,5 @@ public class UserPrincipal implements UserDetails {
     public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() { return active; }
 }

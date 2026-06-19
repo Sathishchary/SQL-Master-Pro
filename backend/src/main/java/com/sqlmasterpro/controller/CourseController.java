@@ -61,4 +61,12 @@ public class CourseController {
             @PathVariable Long id, @RequestBody Course course) {
         return ResponseEntity.ok(ApiResponse.success("Course updated", courseService.updateCourse(id, course)));
     }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete a course")
+    public ResponseEntity<ApiResponse<Void>> deleteCourse(@PathVariable Long id) {
+        courseService.deleteCourse(id);
+        return ResponseEntity.ok(ApiResponse.success("Course deleted", null));
+    }
 }

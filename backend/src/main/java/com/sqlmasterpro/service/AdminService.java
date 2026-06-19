@@ -1,5 +1,6 @@
 package com.sqlmasterpro.service;
 
+import com.sqlmasterpro.model.dto.request.AdminCreateUserRequest;
 import com.sqlmasterpro.model.entity.Blog;
 import com.sqlmasterpro.model.entity.Challenge;
 import com.sqlmasterpro.model.entity.Payment;
@@ -13,7 +14,9 @@ import java.util.Map;
 public interface AdminService {
     Map<String, Object> getDashboardStats();
     Page<User> getUsers(Pageable pageable);
+    User createUser(AdminCreateUserRequest request);
     void deactivateUser(Long id);
+    void activateUser(Long id);
     Page<Payment> getPayments(Pageable pageable);
     Map<String, Object> getAnalytics();
     Question createQuestion(Question question);

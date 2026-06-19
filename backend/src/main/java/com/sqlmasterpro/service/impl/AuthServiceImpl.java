@@ -17,6 +17,7 @@ import com.sqlmasterpro.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -143,6 +144,10 @@ public class AuthServiceImpl implements AuthService {
         Long userId = tokenProvider.getUserIdFromToken(refreshToken);
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (!user.isActive()) {
+            throw new DisabledException("Your account has been deactivated. Please contact support.");
+        }
 
         UserPrincipal principal = UserPrincipal.create(user);
         Authentication auth = new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());

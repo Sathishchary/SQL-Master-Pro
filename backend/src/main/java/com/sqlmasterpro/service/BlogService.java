@@ -8,8 +8,9 @@ import java.util.List;
 
 public interface BlogService {
     Page<Blog> getBlogs(String category, String search, Pageable pageable);
+    Page<Blog> getAllBlogsForAdmin(Pageable pageable);
     Blog getBlogBySlug(String slug);
     List<Blog> getFeaturedBlogs();
-    Blog createBlog(Blog blog);
+    Blog createBlog(Blog blog, Long authorId);
     Blog updateBlog(Long id, Blog blog);
 }
