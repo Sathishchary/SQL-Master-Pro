@@ -4,7 +4,7 @@
       <h1>Course Management</h1>
       <p>Manage SQL learning courses</p>
     </div>
-    <button mat-raised-button color="primary" (click)="showForm = true; editingCourse = null; resetForm()">
+    <button mat-raised-button color="primary" (click)="newCourse()">
       <mat-icon>add</mat-icon> Add Course
     </button>
   </div>
@@ -29,7 +29,8 @@
         </div>
         <label class="field-label">Description</label>
         <quill-editor formControlName="description" [modules]="quillModules"
-          [readOnly]="viewOnly" class="course-editor"></quill-editor>
+          placeholder="Write a short description of what this course covers..."
+          [readOnly]="viewOnly" class="course-editor" [class.read-only]="viewOnly"></quill-editor>
         <div class="form-row">
           <mat-form-field appearance="outline">
             <mat-label>Order Index</mat-label>

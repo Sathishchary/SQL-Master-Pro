@@ -1,12 +1,14 @@
 @if (course) {
   <div class="course-landing">
     <!-- Hero -->
-    <div class="course-hero" [style.background]="heroGradient">
+    <div class="course-hero">
       <div class="hero-inner">
         <div class="hero-left">
           <span class="diff-badge" [class]="course.difficulty.toLowerCase()">{{ course.difficulty }}</span>
           <h1>{{ course.title }}</h1>
-          <p>{{ course.description }}</p>
+          @if (course.shortDescription) {
+            <p>{{ course.shortDescription }}</p>
+          }
           <div class="hero-stats">
             <span><mat-icon>menu_book</mat-icon> {{ course.totalLessons }} lessons</span>
             <span><mat-icon>schedule</mat-icon> ~{{ course.estimatedHours }}h estimated</span>
@@ -29,6 +31,13 @@
     <!-- Main content: lessons + sidebar -->
     <div class="content-wrap">
       <div class="content-main">
+        @if (course.description) {
+          <mat-card class="about-card">
+            <h2>About this course</h2>
+            <div class="about-body" [innerHTML]="course.description"></div>
+          </mat-card>
+        }
+
         <div class="section-header">
           <h2>Course Content</h2>
           <span class="lesson-count">{{ lessons.length }} lessons</span>

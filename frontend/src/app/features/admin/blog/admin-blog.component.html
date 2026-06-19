@@ -40,7 +40,8 @@
 
         <label class="field-label">Content</label>
         <quill-editor formControlName="content" [modules]="quillModules"
-          [readOnly]="viewOnly" class="blog-editor"></quill-editor>
+          placeholder="Write your blog post content here..."
+          [readOnly]="viewOnly" class="blog-editor" [class.read-only]="viewOnly"></quill-editor>
 
         <div class="form-row">
           <mat-form-field appearance="outline">

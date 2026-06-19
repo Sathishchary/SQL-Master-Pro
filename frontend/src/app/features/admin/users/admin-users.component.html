@@ -5,11 +5,13 @@
       <p>Manage all registered users</p>
     </div>
     <div class="header-actions">
-      <mat-form-field appearance="outline" class="search-field">
-        <mat-label>Search users...</mat-label>
-        <input matInput [(ngModel)]="searchQuery" (keyup.enter)="loadUsers()">
-        <mat-icon matPrefix>search</mat-icon>
-      </mat-form-field>
+      <div class="search-box">
+        <mat-icon>search</mat-icon>
+        <input [(ngModel)]="searchQuery" (keyup.enter)="loadUsers()" placeholder="Search users...">
+      </div>
+      <button mat-raised-button color="primary" routerLink="/admin/users/new">
+        <mat-icon>person_add</mat-icon> Add User
+      </button>
     </div>
   </div>
 
@@ -56,9 +58,15 @@
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #userMenu="matMenu">
-            <button mat-menu-item (click)="deactivateUser(u.id)">
-              <mat-icon>block</mat-icon> Deactivate
-            </button>
+            @if (u.active) {
+              <button mat-menu-item (click)="deactivateUser(u.id)">
+                <mat-icon>block</mat-icon> Deactivate
+              </button>
+            } @else {
+              <button mat-menu-item (click)="activateUser(u.id)">
+                <mat-icon>check_circle</mat-icon> Activate
+              </button>
+            }
           </mat-menu>
         </td>
       </ng-container>

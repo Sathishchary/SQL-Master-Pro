@@ -71,7 +71,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.authService.login(emailOrUsername, password, this.rememberMe).subscribe({
       next: (res) => {
         if (res.success) {
-          const returnUrl = sessionStorage.getItem('returnUrl') || '/dashboard';
+          const defaultUrl = this.authService.isAdmin() ? '/admin' : '/dashboard';
+          const returnUrl = sessionStorage.getItem('returnUrl') || defaultUrl;
           sessionStorage.removeItem('returnUrl');
           this.router.navigateByUrl(returnUrl);
           this.snackBar.open('Welcome back! 🎉', 'Close', { duration: 3000 });

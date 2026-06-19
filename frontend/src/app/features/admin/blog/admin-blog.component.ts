@@ -34,9 +34,11 @@ export class AdminBlogComponent implements OnInit {
 
   quillModules = {
     toolbar: [
+      [{ header: [1, 2, 3, false] }],
       ['bold', 'italic', 'underline', 'strike'],
-      [{ header: 1 }, { header: 2 }, { header: 3 }],
-      [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ color: [] }, { background: [] }],
+      [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
+      [{ align: [] }],
       ['blockquote', 'code-block', 'link', 'image'],
       ['clean']
     ]

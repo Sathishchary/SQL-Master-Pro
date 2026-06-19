@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
@@ -18,32 +19,34 @@ import { Course, Lesson } from '../../../core/models/models';
   templateUrl: './course-landing.component.html',
   styleUrls: ['./course-landing.component.css']
 })
-export class CourseLandingComponent implements OnInit {
+export class CourseLandingComponent implements OnInit, OnDestroy {
   course: Course | null = null;
   lessons: Lesson[] = [];
   moreCourses: Course[] = [];
   courseId!: number;
   notFound = false;
 
-  heroGradients = [
-    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-    'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-    'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-    'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
-    'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
-    'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)',
-  ];
-
-  get heroGradient(): string {
-    return this.heroGradients[(this.courseId - 1) % this.heroGradients.length];
-  }
+  private paramsSub?: Subscription;
 
   constructor(private route: ActivatedRoute, private router: Router, private apiService: ApiService) {}
 
   ngOnInit(): void {
-    this.courseId = Number(this.route.snapshot.paramMap.get('courseId'));
+    this.paramsSub = this.route.paramMap.subscribe(params => {
+      this.courseId = Number(params.get('courseId'));
+      this.loadCourse();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.paramsSub?.unsubscribe();
+  }
+
+  private loadCourse(): void {
+    this.course = null;
+    this.lessons = [];
+    this.moreCourses = [];
+    this.notFound = false;
+
     this.apiService.getCourse(this.courseId).subscribe({
       next: (res) => { if (res.success) this.course = res.data; },
       error: () => { this.notFound = true; }

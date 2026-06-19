@@ -1,28 +1,52 @@
-.course-hero { color: white; padding: 56px 0 48px; }
+.course-hero { color: var(--text-primary); padding: 48px 0 36px; border-bottom: 1px solid var(--border-color); }
 .hero-inner { max-width: 1280px; margin: 0 auto; padding: 0 40px;
   display: flex; justify-content: space-between; align-items: center; gap: 40px;
   @media (max-width: 768px) { flex-direction: column; padding: 0 24px; }
 }
 .hero-left { flex: 1; }
 .diff-badge { padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 800;
-  background: rgba(255,255,255,0.2); color: white; letter-spacing: 1px; text-transform: uppercase;
-  display: inline-block; margin-bottom: 16px; backdrop-filter: blur(4px);
+  background: rgba(102,126,234,0.12); color: #667eea; letter-spacing: 1px; text-transform: uppercase;
+  display: inline-block; margin-bottom: 16px;
 }
 .hero-left h1 { font-size: 36px; font-weight: 900; margin: 0 0 14px; line-height: 1.2; }
-.hero-left p { font-size: 16px; color: rgba(255,255,255,0.8); line-height: 1.7; margin-bottom: 24px; max-width: 560px; }
+.hero-left p { font-size: 16px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 24px; max-width: 560px; }
 .hero-stats { display: flex; gap: 20px; flex-wrap: wrap;
-  span { display: flex; align-items: center; gap: 6px; font-size: 14px; color: rgba(255,255,255,0.85);
+  span { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text-secondary);
     mat-icon { font-size: 18px; width: 18px; height: 18px; }
   }
-  .pro-tag { background: rgba(246,173,85,0.25); border: 1px solid rgba(246,173,85,0.5);
-    padding: 4px 12px; border-radius: 20px; color: #fcd34d;
-    mat-icon { color: #fcd34d; }
+  .pro-tag { background: rgba(246,173,85,0.18); border: 1px solid rgba(246,173,85,0.4);
+    padding: 4px 12px; border-radius: 20px; color: #b45309;
+    mat-icon { color: #b45309; }
   }
 }
-.start-btn { background: white !important; color: #667eea !important;
+.start-btn { background: linear-gradient(135deg, #667eea, #764ba2) !important; color: white !important;
   font-size: 16px !important; font-weight: 800 !important; padding: 12px 32px !important;
-  border-radius: 50px !important; box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+  border-radius: 50px !important; box-shadow: 0 8px 24px rgba(102,126,234,0.3) !important;
   white-space: nowrap;
+}
+
+/* ─── About this course ─── */
+.about-card { background: #fff !important; padding: 26px 28px !important; border-radius: 16px !important;
+  margin-bottom: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+  h2 { font-size: 18px; font-weight: 800; margin: 0 0 14px; color: var(--text-primary); }
+}
+.about-body { font-size: 15px; color: var(--text-secondary); line-height: 1.8;
+  overflow-wrap: anywhere; word-break: break-word; max-width: 100%;
+  :first-child { margin-top: 0; }
+  h1 { font-size: 24px; font-weight: 800; margin: 0 0 14px; color: var(--text-primary); }
+  h2 { font-size: 20px; font-weight: 800; margin: 28px 0 12px; color: var(--text-primary); }
+  h3 { font-size: 17px; font-weight: 700; margin: 22px 0 10px; color: var(--text-primary); }
+  p { margin-bottom: 14px; }
+  ul, ol { padding-left: 22px; margin-bottom: 14px; li { margin-bottom: 6px; } }
+  strong { color: var(--text-primary); }
+  code { background: rgba(102,126,234,0.12); color: #667eea; padding: 2px 8px; border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  }
+  pre { background: #0d1117; color: #e6edf3; padding: 18px 20px; border-radius: 12px;
+    overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    line-height: 1.7; margin-bottom: 18px; border: 1px solid #21262d;
+    code { background: none; color: inherit; padding: 0; font-size: 13px; }
+  }
 }
 
 /* ─── Content layout: lessons + sidebar, uses full width ─── */

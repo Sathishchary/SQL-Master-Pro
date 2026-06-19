@@ -1,4 +1,4 @@
-.admin-layout { display: flex; min-height: calc(100vh - 64px); }
+.admin-layout { display: flex; min-height: 100vh; }
 .admin-sidebar { width: 240px; background: #1a1a2e; color: white; padding: 24px 0;
   flex-shrink: 0;
 }
@@ -16,4 +16,16 @@
 .nav-badge { margin-left: auto; background: #667eea; color: white;
   padding: 2px 8px; border-radius: 20px; font-size: 11px;
 }
-.admin-content { flex: 1; padding: 24px; background: var(--bg); overflow-y: auto; }
+.admin-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.admin-topbar { display: flex; align-items: center; height: 52px; padding: 0 24px;
+  background: var(--bg-primary); border-bottom: 1px solid var(--border-color); flex-shrink: 0;
+}
+.spacer { flex: 1; }
+.avatar-btn { padding: 0 !important; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;
+}
+.menu-header { opacity: 1 !important; line-height: 1.3; }
+.menu-user-name { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+.menu-user-email { font-size: 12px; color: var(--text-secondary); }
+.admin-content { flex: 1; padding: 20px 28px; background: var(--bg); overflow-y: auto; }

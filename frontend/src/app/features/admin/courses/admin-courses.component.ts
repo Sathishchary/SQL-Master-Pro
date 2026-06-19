@@ -36,9 +36,11 @@ export class AdminCoursesComponent implements OnInit, AfterViewInit {
 
   quillModules = {
     toolbar: [
+      [{ header: [1, 2, 3, false] }],
       ['bold', 'italic', 'underline', 'strike'],
-      [{ header: 1 }, { header: 2 }, { header: 3 }],
-      [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ color: [] }, { background: [] }],
+      [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
+      [{ align: [] }],
       ['blockquote', 'code-block', 'link'],
       ['clean']
     ]
@@ -67,6 +69,13 @@ export class AdminCoursesComponent implements OnInit, AfterViewInit {
     });
   }
 
+  newCourse(): void {
+    this.editingCourse = null;
+    this.viewOnly = false;
+    this.showForm = true;
+    this.resetForm();
+  }
+
   viewCourse(course: Course): void {
     this.editingCourse = course;
     this.viewOnly = true;
@@ -90,7 +99,7 @@ export class AdminCoursesComponent implements OnInit, AfterViewInit {
 
   resetForm(): void {
     this.courseForm.enable();
-    this.courseForm.reset({ difficulty: 'BEGINNER', orderIndex: 1, published: false, premium: false });
+    this.courseForm.reset({ difficulty: 'BEGINNER', orderIndex: 1, estimatedHours: 1, published: false, premium: false });
   }
 
   saveCourse(): void {

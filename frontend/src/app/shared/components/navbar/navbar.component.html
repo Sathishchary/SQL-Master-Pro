@@ -4,7 +4,7 @@
     <span class="brand-name">SQL Master Pro</span>
   </a>
 
-  @if (!isMobile) {
+  @if (!isMobile && !isAdmin()) {
   <nav class="nav-links">
     <a routerLink="/learn" routerLinkActive="active" mat-button>Learn</a>
     <a routerLink="/playground" routerLinkActive="active" mat-button>Playground</a>
@@ -49,19 +49,19 @@
         <div class="menu-user-plan">{{ currentUser()?.subscriptionPlan }} Plan</div>
       </div>
       <mat-divider></mat-divider>
-      <a mat-menu-item routerLink="/dashboard">
-        <mat-icon>dashboard</mat-icon> Dashboard
-      </a>
-      <a mat-menu-item routerLink="/certificates">
-        <mat-icon>workspace_premium</mat-icon> My Certificates
-      </a>
-      <a mat-menu-item routerLink="/pricing">
-        <mat-icon>upgrade</mat-icon> Upgrade Plan
-      </a>
       @if (isAdmin()) {
-        <mat-divider></mat-divider>
         <a mat-menu-item routerLink="/admin">
           <mat-icon>admin_panel_settings</mat-icon> Admin Panel
+        </a>
+      } @else {
+        <a mat-menu-item routerLink="/dashboard">
+          <mat-icon>dashboard</mat-icon> Dashboard
+        </a>
+        <a mat-menu-item routerLink="/certificates">
+          <mat-icon>workspace_premium</mat-icon> My Certificates
+        </a>
+        <a mat-menu-item routerLink="/pricing">
+          <mat-icon>upgrade</mat-icon> Upgrade Plan
         </a>
       }
       <mat-divider></mat-divider>

@@ -8,6 +8,7 @@ export interface User {
   lastName: string;
   profilePicture?: string;
   bio?: string;
+  phone?: string;
   roles: string[];
   subscriptionPlan: SubscriptionPlan;
   subscriptionExpiry?: string;

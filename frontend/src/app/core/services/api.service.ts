@@ -139,6 +139,14 @@ export class ApiService {
     return this.http.get<ApiResponse<Blog[]>>(`${this.base}/blogs/featured`);
   }
 
+  // Profile
+  getMyProfile(): Observable<ApiResponse<User>> {
+    return this.http.get<ApiResponse<User>>(`${this.base}/users/me`);
+  }
+  updateMyProfile(data: Partial<User>): Observable<ApiResponse<User>> {
+    return this.http.put<ApiResponse<User>>(`${this.base}/users/me`, data);
+  }
+
   // Admin
   getAdminStats(): Observable<ApiResponse<AdminDashboardStats>> {
     return this.http.get<ApiResponse<AdminDashboardStats>>(`${this.base}/admin/dashboard`);
@@ -146,6 +154,9 @@ export class ApiService {
   getAdminUsers(page = 0, size = 20): Observable<ApiResponse<PageResponse<User>>> {
     const params = new HttpParams().set('page', page).set('size', size);
     return this.http.get<ApiResponse<PageResponse<User>>>(`${this.base}/admin/users`, { params });
+  }
+  createAdminUser(data: { username: string; email: string; password: string; firstName: string; lastName: string; role: string }): Observable<ApiResponse<User>> {
+    return this.http.post<ApiResponse<User>>(`${this.base}/admin/users`, data);
   }
   getAdminPayments(page = 0, size = 20): Observable<ApiResponse<PageResponse<Payment>>> {
     const params = new HttpParams().set('page', page).set('size', size);
@@ -165,6 +176,9 @@ export class ApiService {
   }
   deleteUser(id: number): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(`${this.base}/admin/users/${id}`);
+  }
+  activateUser(id: number): Observable<ApiResponse<void>> {
+    return this.http.put<ApiResponse<void>>(`${this.base}/admin/users/${id}/activate`, {});
   }
 
   // Admin Blog management

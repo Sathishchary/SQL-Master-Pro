@@ -1,0 +1,73 @@
+.admin-user-create { padding: 20px 32px 56px; max-width: 880px; margin: 0 auto; }
+
+/* ─── Breadcrumb ─── */
+.breadcrumb { display: flex; align-items: center; gap: 4px; font-size: 13px;
+  color: var(--text-secondary); margin-bottom: 16px;
+  a { color: var(--text-secondary); text-decoration: none; &:hover { color: #667eea; } }
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  span { color: var(--text-primary); font-weight: 600; }
+}
+
+/* ─── Header ─── */
+.page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
+  h1 { font-size: 26px; font-weight: 800; margin: 0 0 4px; color: var(--text-primary); letter-spacing: -0.3px; }
+  p { color: var(--text-secondary); margin: 0; font-size: 14px; max-width: 480px; line-height: 1.5; }
+}
+.avatar-preview { width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #667eea, #764ba2); color: white;
+  display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700;
+}
+
+/* ─── Card & sections ─── */
+.form-card { padding: 0 !important; border-radius: 16px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04) !important;
+  border: 1px solid var(--border-color);
+}
+.section { padding: 28px 32px; }
+.section-heading { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px;
+  mat-icon { font-size: 20px; width: 20px; height: 20px; color: #667eea; margin-top: 1px; }
+}
+.section-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.section-subtitle { font-size: 12.5px; color: var(--text-secondary); margin-top: 1px; }
+mat-divider { margin: 0 32px; }
+
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px;
+  @media (max-width: 600px) { grid-template-columns: 1fr; }
+}
+.full-width { grid-column: 1 / -1; }
+
+/* ─── Role cards ─── */
+.role-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  @media (max-width: 700px) { grid-template-columns: 1fr; }
+}
+.role-card { position: relative; display: flex; flex-direction: column; align-items: flex-start;
+  gap: 4px; text-align: left; padding: 16px; border-radius: 12px; border: 1.5px solid var(--border-color);
+  background: var(--surface); cursor: pointer; transition: all 0.15s; font-family: inherit;
+  mat-icon:first-child { font-size: 22px; width: 22px; height: 22px; color: var(--text-secondary); margin-bottom: 4px; }
+  &:hover { border-color: #a5b4fc; background: rgba(102,126,234,0.04); }
+  &.selected { border-color: #667eea; background: rgba(102,126,234,0.06);
+    mat-icon:first-child { color: #667eea; }
+  }
+}
+.role-label { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.role-description { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+.role-check { position: absolute; top: 12px; right: 12px; font-size: 18px; width: 18px; height: 18px; color: #667eea; }
+
+/* ─── Actions ─── */
+.form-actions { display: flex; justify-content: flex-end; gap: 10px;
+  padding: 18px 32px; border-top: 1px solid var(--border-color); background: var(--bg-secondary);
+  border-radius: 0 0 16px 16px;
+}
+.form-actions ::ng-deep button[mat-raised-button] mat-icon {
+  font-size: 18px; width: 18px; height: 18px; vertical-align: middle;
+  margin-right: 6px; margin-top: -2px;
+}
+.spin-icon { font-size: 16px !important; width: 16px !important; height: 16px !important; animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+@media (max-width: 600px) {
+  .admin-user-create { padding: 16px 16px 40px; }
+  .section { padding: 22px 20px; }
+  .form-actions { padding: 16px 20px; }
+  mat-divider { margin: 0 20px; }
+}

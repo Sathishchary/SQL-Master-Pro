@@ -1,0 +1,80 @@
+<div class="profile-page">
+  <div class="profile-header">
+    <button mat-icon-button (click)="back()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>My Profile</h1>
+  </div>
+
+  <div class="profile-card">
+    <div class="identity-row">
+      @if (profilePicture()) {
+        <img [src]="profilePicture()" class="avatar-img" alt="Profile picture">
+      } @else {
+        <div class="avatar-placeholder">{{ userInitials() }}</div>
+      }
+      <div class="identity-info">
+        <div class="identity-name">{{ firstName() }} {{ lastName() }}</div>
+        <div class="identity-meta">
+          <mat-chip-set>
+            <mat-chip>&#64;{{ username() }}</mat-chip>
+            <mat-chip class="plan-chip">{{ subscriptionPlan() }}</mat-chip>
+          </mat-chip-set>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat"><mat-icon>bolt</mat-icon> {{ totalXp() }} XP</div>
+      <div class="stat"><mat-icon>local_fire_department</mat-icon> {{ learningStreak() }} day streak</div>
+      @if (joinedAt()) {
+        <div class="stat"><mat-icon>event</mat-icon> Joined {{ joinedAt() | date:'mediumDate' }}</div>
+      }
+    </div>
+
+    <div class="section-title">Account</div>
+    <div class="field-grid">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sm">
+        <mat-label>Username</mat-label>
+        <input matInput [value]="username()" disabled>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sm">
+        <mat-label>Email</mat-label>
+        <input matInput [value]="email()" disabled>
+      </mat-form-field>
+    </div>
+
+    <div class="section-title">Personal Info</div>
+    <div class="field-grid">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sm">
+        <mat-label>First Name</mat-label>
+        <input matInput [ngModel]="firstName()" (ngModelChange)="firstName.set($event)">
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sm">
+        <mat-label>Last Name</mat-label>
+        <input matInput [ngModel]="lastName()" (ngModelChange)="lastName.set($event)">
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sm">
+        <mat-label>Phone</mat-label>
+        <input matInput [ngModel]="phone()" (ngModelChange)="phone.set($event)">
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sm">
+        <mat-label>Profile Picture URL</mat-label>
+        <input matInput [ngModel]="profilePicture()" (ngModelChange)="profilePicture.set($event)"
+          placeholder="https://example.com/avatar.jpg">
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sm full-width">
+      <mat-label>Bio</mat-label>
+      <textarea matInput rows="3" [ngModel]="bio()" (ngModelChange)="bio.set($event)"></textarea>
+    </mat-form-field>
+
+    <div class="form-actions">
+      <button mat-button type="button" (click)="back()">Cancel</button>
+      <button mat-raised-button color="primary" type="button" [disabled]="!canSave() || isSaving()" (click)="save()">
+        {{ isSaving() ? 'Saving...' : 'Save Changes' }}
+      </button>
+    </div>
+  </div>
+</div>

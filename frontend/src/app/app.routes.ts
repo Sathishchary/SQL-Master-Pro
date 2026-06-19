@@ -2,10 +2,12 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
 import { guestGuard } from './core/guards/guest.guard';
+import { redirectAdminGuard } from './core/guards/redirect-admin.guard';
 
 export const routes: Routes = [
   {
     path: '',
+    canActivate: [redirectAdminGuard],
     loadComponent: () => import('./features/landing/landing.component').then(m => m.LandingComponent)
   },
   {
@@ -32,11 +34,17 @@ export const routes: Routes = [
   },
   {
     path: 'dashboard',
-    canActivate: [authGuard],
+    canActivate: [authGuard, redirectAdminGuard],
     loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
   },
   {
+    path: 'profile',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent)
+  },
+  {
     path: 'learn',
+    canActivate: [redirectAdminGuard],
     children: [
       {
         path: '',
@@ -48,18 +56,19 @@ export const routes: Routes = [
       },
       {
         path: ':courseId/lesson/:lessonId',
-        canActivate: [authGuard],
+        canActivate: [authGuard, redirectAdminGuard],
         loadComponent: () => import('./features/learning/lesson-detail/lesson-detail.component').then(m => m.LessonDetailComponent)
       }
     ]
   },
   {
     path: 'playground',
-    canActivate: [authGuard],
+    canActivate: [authGuard, redirectAdminGuard],
     loadComponent: () => import('./features/playground/playground.component').then(m => m.PlaygroundComponent)
   },
   {
     path: 'quiz',
+    canActivate: [redirectAdminGuard],
     children: [
       {
         path: '',
@@ -67,13 +76,14 @@ export const routes: Routes = [
       },
       {
         path: ':id/attempt',
-        canActivate: [authGuard],
+        canActivate: [authGuard, redirectAdminGuard],
         loadComponent: () => import('./features/quiz/quiz-attempt/quiz-attempt.component').then(m => m.QuizAttemptComponent)
       }
     ]
   },
   {
     path: 'challenges',
+    canActivate: [redirectAdminGuard],
     children: [
       {
         path: '',
@@ -81,22 +91,24 @@ export const routes: Routes = [
       },
       {
         path: ':id',
-        canActivate: [authGuard],
+        canActivate: [authGuard, redirectAdminGuard],
         loadComponent: () => import('./features/challenges/challenge-detail/challenge-detail.component').then(m => m.ChallengeDetailComponent)
       }
     ]
   },
   {
     path: 'certificates',
-    canActivate: [authGuard],
+    canActivate: [authGuard, redirectAdminGuard],
     loadComponent: () => import('./features/certifications/certifications.component').then(m => m.CertificationsComponent)
   },
   {
     path: 'interview-prep',
+    canActivate: [redirectAdminGuard],
     loadComponent: () => import('./features/interview-prep/interview-prep.component').then(m => m.InterviewPrepComponent)
   },
   {
     path: 'blog',
+    canActivate: [redirectAdminGuard],
     children: [
       {
         path: '',
@@ -110,11 +122,12 @@ export const routes: Routes = [
   },
   {
     path: 'pricing',
+    canActivate: [redirectAdminGuard],
     loadComponent: () => import('./features/payment/plans/plans.component').then(m => m.PlansComponent)
   },
   {
     path: 'checkout',
-    canActivate: [authGuard],
+    canActivate: [authGuard, redirectAdminGuard],
     loadComponent: () => import('./features/payment/checkout/checkout.component').then(m => m.CheckoutComponent)
   },
   {
@@ -134,6 +147,10 @@ export const routes: Routes = [
       {
         path: 'users',
         loadComponent: () => import('./features/admin/users/admin-users.component').then(m => m.AdminUsersComponent)
+      },
+      {
+        path: 'users/new',
+        loadComponent: () => import('./features/admin/users/admin-user-create/admin-user-create.component').then(m => m.AdminUserCreateComponent)
       },
       {
         path: 'courses',
