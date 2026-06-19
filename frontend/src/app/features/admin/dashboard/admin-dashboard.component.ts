@@ -8,7 +8,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatBadgeModule } from '@angular/material/badge';
 import { ApiService } from '../../../core/services/api.service';
-import { AdminDashboardStats, StatCard, NavItem, User } from '../../../core/models/models';
+import { AdminDashboardStats, StatCard, User } from '../../../core/models/models';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -23,14 +23,6 @@ export class AdminDashboardComponent implements OnInit {
   recentUsers: User[] = [];
   revenueStats: StatCard[] = [];
   statsCards: StatCard[] = [];
-
-  navItems: NavItem[] = [
-    { icon: 'dashboard', label: 'Dashboard', path: '/admin/dashboard' },
-    { icon: 'people', label: 'Users', path: '/admin/users' },
-    { icon: 'library_books', label: 'Courses', path: '/admin/courses' },
-    { icon: 'analytics', label: 'Analytics', path: '/admin/analytics' },
-    { icon: 'payments', label: 'Payments', path: '/admin/payments' }
-  ];
 
   constructor(private apiService: ApiService) {}
 

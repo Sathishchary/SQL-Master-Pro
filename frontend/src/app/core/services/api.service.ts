@@ -155,12 +155,27 @@ export class ApiService {
     return this.http.get<ApiResponse<AdminAnalytics>>(`${this.base}/admin/analytics`);
   }
   createCourse(data: Partial<Course>): Observable<ApiResponse<Course>> {
-    return this.http.post<ApiResponse<Course>>(`${this.base}/admin/courses`, data);
+    return this.http.post<ApiResponse<Course>>(`${this.base}/courses`, data);
   }
   updateCourse(id: number, data: Partial<Course>): Observable<ApiResponse<Course>> {
-    return this.http.put<ApiResponse<Course>>(`${this.base}/admin/courses/${id}`, data);
+    return this.http.put<ApiResponse<Course>>(`${this.base}/courses/${id}`, data);
+  }
+  deleteCourse(id: number): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.base}/courses/${id}`);
   }
   deleteUser(id: number): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(`${this.base}/admin/users/${id}`);
+  }
+
+  // Admin Blog management
+  getAdminBlogs(page = 0, size = 10): Observable<ApiResponse<PageResponse<Blog>>> {
+    const params = new HttpParams().set('page', page).set('size', size).set('sort', 'createdAt,desc');
+    return this.http.get<ApiResponse<PageResponse<Blog>>>(`${this.base}/blogs/admin/all`, { params });
+  }
+  createBlog(data: Partial<Blog>): Observable<ApiResponse<Blog>> {
+    return this.http.post<ApiResponse<Blog>>(`${this.base}/blogs`, data);
+  }
+  updateBlog(id: number, data: Partial<Blog>): Observable<ApiResponse<Blog>> {
+    return this.http.put<ApiResponse<Blog>>(`${this.base}/blogs/${id}`, data);
   }
 }

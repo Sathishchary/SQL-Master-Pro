@@ -11,7 +11,7 @@
 
   @if (showForm) {
     <div class="course-form">
-      <h3>{{ editingCourse ? 'Edit Course' : 'New Course' }}</h3>
+      <h3>{{ viewOnly ? 'View Course' : (editingCourse ? 'Edit Course' : 'New Course') }}</h3>
       <form [formGroup]="courseForm" (ngSubmit)="saveCourse()">
         <div class="form-row">
           <mat-form-field appearance="outline">
@@ -27,10 +27,9 @@
             </mat-select>
           </mat-form-field>
         </div>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Description</mat-label>
-          <textarea matInput formControlName="description" rows="3"></textarea>
-        </mat-form-field>
+        <label class="field-label">Description</label>
+        <quill-editor formControlName="description" [modules]="quillModules"
+          [readOnly]="viewOnly" class="course-editor"></quill-editor>
         <div class="form-row">
           <mat-form-field appearance="outline">
             <mat-label>Order Index</mat-label>
@@ -46,15 +45,17 @@
           <mat-slide-toggle formControlName="premium" color="accent">Premium</mat-slide-toggle>
         </div>
         <div class="form-actions">
-          <button mat-button type="button" (click)="showForm = false">Cancel</button>
-          <button mat-raised-button color="primary" type="submit" [disabled]="courseForm.invalid">Save</button>
+          <button mat-button type="button" (click)="closeForm()">{{ viewOnly ? 'Close' : 'Cancel' }}</button>
+          @if (!viewOnly) {
+            <button mat-raised-button color="primary" type="submit" [disabled]="courseForm.invalid">Save</button>
+          }
         </div>
       </form>
     </div>
   }
 
   <div class="courses-table-card">
-    <table mat-table [dataSource]="courses" class="courses-table">
+    <table mat-table [dataSource]="dataSource" class="courses-table">
       <ng-container matColumnDef="title">
         <th mat-header-cell *matHeaderCellDef>Title</th>
         <td mat-cell *matCellDef="let c">
@@ -93,11 +94,14 @@
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef>Actions</th>
         <td mat-cell *matCellDef="let c">
-          <button mat-icon-button (click)="editCourse(c)"><mat-icon>edit</mat-icon></button>
+          <button mat-icon-button matTooltip="View" (click)="viewCourse(c)"><mat-icon>visibility</mat-icon></button>
+          <button mat-icon-button matTooltip="Edit" (click)="editCourse(c)"><mat-icon>edit</mat-icon></button>
+          <button mat-icon-button matTooltip="Delete" color="warn" (click)="deleteCourse(c)"><mat-icon>delete</mat-icon></button>
         </td>
       </ng-container>
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
+    <mat-paginator [pageSizeOptions]="[5, 10, 25]" [pageSize]="10" showFirstLastButtons></mat-paginator>
   </div>
 </div>

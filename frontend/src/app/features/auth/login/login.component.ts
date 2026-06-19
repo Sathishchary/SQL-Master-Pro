@@ -68,7 +68,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     if (this.loginForm.invalid) return;
     this.isLoading = true;
     const { emailOrUsername, password } = this.loginForm.value;
-    this.authService.login(emailOrUsername, password).subscribe({
+    this.authService.login(emailOrUsername, password, this.rememberMe).subscribe({
       next: (res) => {
         if (res.success) {
           const returnUrl = sessionStorage.getItem('returnUrl') || '/dashboard';

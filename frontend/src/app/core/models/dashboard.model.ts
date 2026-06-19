@@ -38,6 +38,7 @@ export interface AdminDashboardStats {
   totalChallenges: number;
   totalCertificates: number;
   totalPayments: number;
+  totalRevenue: number;
   activeUsers: number;
 }
 

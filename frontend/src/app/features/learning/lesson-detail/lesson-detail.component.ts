@@ -33,8 +33,16 @@ export class LessonDetailComponent implements OnInit {
     private apiService: ApiService, private snackBar: MatSnackBar) {}
 
   ngOnInit(): void {
-    this.courseId = Number(this.route.snapshot.paramMap.get('courseId'));
-    const lessonId = Number(this.route.snapshot.paramMap.get('lessonId'));
+    this.route.paramMap.subscribe(params => {
+      this.courseId = Number(params.get('courseId'));
+      const lessonId = Number(params.get('lessonId'));
+      this.loadLesson(lessonId);
+    });
+  }
+
+  private loadLesson(lessonId: number): void {
+    this.completed = false;
+    this.lesson = null;
 
     this.apiService.getCourse(this.courseId).subscribe({
       next: (res) => { if (res.success) this.course = res.data; }
@@ -44,8 +52,8 @@ export class LessonDetailComponent implements OnInit {
         if (res.success) {
           this.lessons = res.data;
           const idx = this.lessons.findIndex(l => l.id === lessonId);
-          if (idx > 0) this.prevLessonId = this.lessons[idx - 1].id;
-          if (idx < this.lessons.length - 1) this.nextLessonId = this.lessons[idx + 1].id;
+          this.prevLessonId = idx > 0 ? this.lessons[idx - 1].id : null;
+          this.nextLessonId = idx < this.lessons.length - 1 ? this.lessons[idx + 1].id : null;
           const completedCount = this.lessons.filter(l => l.completed).length;
           this.courseProgress = Math.round((completedCount / this.lessons.length) * 100);
           if (idx >= 0) this.completed = !!this.lessons[idx].completed;

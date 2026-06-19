@@ -9,6 +9,10 @@
 }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .full-width { width: 100%; }
+.field-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin: 4px 0 6px; }
+.course-editor { display: block; margin-bottom: 20px; background: var(--surface);
+  ::ng-deep .ql-editor { min-height: 160px; font-size: 14px; }
+}
 .toggles { display: flex; gap: 24px; margin-bottom: 16px; }
 .form-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .courses-table-card { background: var(--surface); border-radius: 16px; overflow: hidden;

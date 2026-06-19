@@ -120,6 +120,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     canActivate: [authGuard, adminGuard],
+    loadComponent: () => import('./features/admin/admin-layout/admin-layout.component').then(m => m.AdminLayoutComponent),
     children: [
       {
         path: '',
@@ -141,6 +142,10 @@ export const routes: Routes = [
       {
         path: 'analytics',
         loadComponent: () => import('./features/admin/analytics/admin-analytics.component').then(m => m.AdminAnalyticsComponent)
+      },
+      {
+        path: 'blog',
+        loadComponent: () => import('./features/admin/blog/admin-blog.component').then(m => m.AdminBlogComponent)
       }
     ]
   },

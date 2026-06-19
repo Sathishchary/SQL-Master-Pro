@@ -19,6 +19,7 @@ const THEMES = ['light', 'dark'];
 export class AppComponent implements OnInit {
   currentTheme = 'light';
   showFooter = true;
+  showNavbar = true;
 
   get themeClass(): string {
     return this.currentTheme === 'light' ? '' : `${this.currentTheme}-theme`;
@@ -31,9 +32,9 @@ export class AppComponent implements OnInit {
     this.currentTheme = THEMES.includes(saved) ? saved : 'light';
     this.applyTheme();
 
-    this.showFooter = !this.router.url.startsWith('/playground');
+    this.updateLayout(this.router.url);
     this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe((e) => {
-      this.showFooter = !(e as NavigationEnd).urlAfterRedirects.startsWith('/playground');
+      this.updateLayout((e as NavigationEnd).urlAfterRedirects);
     });
   }
 
@@ -42,6 +43,11 @@ export class AppComponent implements OnInit {
     this.currentTheme = theme;
     localStorage.setItem('sql-master-theme', theme);
     this.applyTheme();
+  }
+
+  private updateLayout(url: string): void {
+    this.showNavbar = !url.startsWith('/admin');
+    this.showFooter = !url.startsWith('/playground') && !url.startsWith('/admin');
   }
 
   private applyTheme(): void {
