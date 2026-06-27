@@ -3,7 +3,9 @@ package com.sqlmasterpro.service.impl;
 import com.sqlmasterpro.exception.BadRequestException;
 import com.sqlmasterpro.exception.ResourceNotFoundException;
 import com.sqlmasterpro.model.dto.request.AdminCreateUserRequest;
+import com.sqlmasterpro.model.dto.request.AdminUpdateUserRequest;
 import com.sqlmasterpro.model.entity.*;
+import com.sqlmasterpro.model.enums.SubscriptionPlan;
 import com.sqlmasterpro.repository.*;
 import com.sqlmasterpro.service.AdminService;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +60,12 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
+    @Override
     @Transactional
     public User createUser(AdminCreateUserRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -85,11 +93,47 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional
+    public User updateUser(Long id, AdminUpdateUserRequest request) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (!user.getEmail().equalsIgnoreCase(request.getEmail())
+                && userRepository.existsByEmail(request.getEmail())) {
+            throw new BadRequestException("Email is already registered");
+        }
+        if (!user.getUsername().equalsIgnoreCase(request.getUsername())
+                && userRepository.existsByUsername(request.getUsername())) {
+            throw new BadRequestException("Username is already taken");
+        }
+
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setProfilePicture(request.getProfilePicture());
+        return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
     public void deactivateUser(Long id) {
         User user = userRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        boolean isAdmin = user.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.getName()));
+        if (isAdmin) {
+            throw new BadRequestException("Admin users cannot be deactivated");
+        }
         user.setActive(false);
         userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public User updateUserPlan(Long id, SubscriptionPlan plan) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        user.setSubscriptionPlan(plan);
+        return userRepository.save(user);
     }
 
     @Override

@@ -75,10 +75,14 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("New user registered: {}", user.getEmail());
 
-        Authentication auth = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-
-        return buildAuthResponse(auth, user);
+        return AuthResponse.builder()
+            .userId(user.getId())
+            .username(user.getUsername())
+            .email(user.getEmail())
+            .firstName(user.getFirstName())
+            .lastName(user.getLastName())
+            .emailVerified(false)
+            .build();
     }
 
     @Override
@@ -89,6 +93,10 @@ public class AuthServiceImpl implements AuthService {
         UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
         User user = userRepository.findById(principal.getId())
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (!user.isEmailVerified()) {
+            throw new BadRequestException("Please verify your email before logging in. Check your inbox for the verification link.");
+        }
 
         user.setLastActive(LocalDate.now());
         userRepository.save(user);
@@ -104,6 +112,22 @@ public class AuthServiceImpl implements AuthService {
         user.setEmailVerified(true);
         user.setEmailVerificationToken(null);
         userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void resendVerificationEmail(String email) {
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new ResourceNotFoundException("No account found with that email"));
+
+        if (user.isEmailVerified()) {
+            throw new BadRequestException("This email is already verified");
+        }
+
+        String verificationToken = UUID.randomUUID().toString();
+        user.setEmailVerificationToken(verificationToken);
+        userRepository.save(user);
+        emailService.sendVerificationEmail(user.getEmail(), user.getFirstName(), verificationToken);
     }
 
     @Override

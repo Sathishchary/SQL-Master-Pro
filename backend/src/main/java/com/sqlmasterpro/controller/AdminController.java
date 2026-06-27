@@ -1,8 +1,10 @@
 package com.sqlmasterpro.controller;
 
 import com.sqlmasterpro.model.dto.request.AdminCreateUserRequest;
+import com.sqlmasterpro.model.dto.request.AdminUpdateUserRequest;
 import com.sqlmasterpro.model.dto.response.ApiResponse;
 import com.sqlmasterpro.model.entity.*;
+import com.sqlmasterpro.model.enums.SubscriptionPlan;
 import com.sqlmasterpro.service.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,10 +39,23 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success(adminService.getUsers(pageable)));
     }
 
+    @GetMapping("/users/{id}")
+    @Operation(summary = "Get a single user by id")
+    public ResponseEntity<ApiResponse<User>> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(adminService.getUserById(id)));
+    }
+
     @PostMapping("/users")
     @Operation(summary = "Create a new user")
     public ResponseEntity<ApiResponse<User>> createUser(@Valid @RequestBody AdminCreateUserRequest request) {
         return ResponseEntity.ok(ApiResponse.success("User created", adminService.createUser(request)));
+    }
+
+    @PutMapping("/users/{id}")
+    @Operation(summary = "Update a user's name and email")
+    public ResponseEntity<ApiResponse<User>> updateUser(
+            @PathVariable Long id, @Valid @RequestBody AdminUpdateUserRequest request) {
+        return ResponseEntity.ok(ApiResponse.success("User updated", adminService.updateUser(id, request)));
     }
 
     @DeleteMapping("/users/{id}")
@@ -55,6 +70,14 @@ public class AdminController {
     public ResponseEntity<ApiResponse<Void>> activateUser(@PathVariable Long id) {
         adminService.activateUser(id);
         return ResponseEntity.ok(ApiResponse.success("User activated", null));
+    }
+
+    @PutMapping("/users/{id}/plan")
+    @Operation(summary = "Update a user's subscription plan")
+    public ResponseEntity<ApiResponse<User>> updateUserPlan(
+            @PathVariable Long id, @RequestBody Map<String, String> body) {
+        SubscriptionPlan plan = SubscriptionPlan.valueOf(body.get("plan"));
+        return ResponseEntity.ok(ApiResponse.success("Plan updated", adminService.updateUserPlan(id, plan)));
     }
 
     @GetMapping("/payments")

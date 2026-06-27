@@ -46,11 +46,17 @@ public class BlogServiceImpl implements BlogService {
     @Override
     @Transactional
     public Blog getBlogBySlug(String slug) {
-        Blog blog = blogRepository.findBySlug(slug)
+        Blog blog = blogRepository.findBySlugWithAuthor(slug)
             .orElseThrow(() -> new ResourceNotFoundException("Blog not found"));
         blog.setViews(blog.getViews() + 1);
         blogRepository.save(blog);
         return blog;
+    }
+
+    @Override
+    public Blog getBlogById(Long id) {
+        return blogRepository.findByIdWithAuthor(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Blog not found"));
     }
 
     @Override
@@ -76,7 +82,7 @@ public class BlogServiceImpl implements BlogService {
     @Override
     @Transactional
     public Blog updateBlog(Long id, Blog blog) {
-        Blog existing = blogRepository.findById(id)
+        Blog existing = blogRepository.findByIdWithAuthor(id)
             .orElseThrow(() -> new ResourceNotFoundException("Blog not found"));
         blog.setId(id);
         blog.setAuthor(existing.getAuthor());
@@ -89,6 +95,26 @@ public class BlogServiceImpl implements BlogService {
             blog.setPublishedAt(existing.getPublishedAt() != null ? existing.getPublishedAt() : LocalDateTime.now());
         }
         return blogRepository.save(blog);
+    }
+
+    @Override
+    @Transactional
+    public Blog setPublished(Long id, boolean published) {
+        Blog existing = blogRepository.findByIdWithAuthor(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Blog not found"));
+        existing.setPublished(published);
+        if (published && existing.getPublishedAt() == null) {
+            existing.setPublishedAt(LocalDateTime.now());
+        }
+        return blogRepository.save(existing);
+    }
+
+    @Override
+    @Transactional
+    public void deleteBlog(Long id) {
+        Blog blog = blogRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Blog not found"));
+        blogRepository.delete(blog);
     }
 
     private String slugify(String title) {

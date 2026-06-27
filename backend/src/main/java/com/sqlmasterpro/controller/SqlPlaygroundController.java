@@ -1,9 +1,11 @@
 package com.sqlmasterpro.controller;
 
 import com.sqlmasterpro.model.dto.response.ApiResponse;
+import com.sqlmasterpro.model.dto.response.CustomTableResponse;
 import com.sqlmasterpro.model.dto.response.SqlExecutionResponse;
 import com.sqlmasterpro.model.entity.SqlExecution;
 import com.sqlmasterpro.security.UserPrincipal;
+import com.sqlmasterpro.service.CustomTableService;
 import com.sqlmasterpro.service.SqlExecutionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -25,6 +28,7 @@ import java.util.Map;
 public class SqlPlaygroundController {
 
     private final SqlExecutionService sqlExecutionService;
+    private final CustomTableService customTableService;
 
     @PostMapping("/execute")
     @PreAuthorize("isAuthenticated()")
@@ -92,5 +96,23 @@ public class SqlPlaygroundController {
             Map.of("id", "movies_db", "name", "Movies Database", "description", "Films, actors, directors, genres, ratings")
         );
         return ResponseEntity.ok(ApiResponse.success(databases));
+    }
+
+    @PostMapping(value = "/custom-table/upload", consumes = "multipart/form-data")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Upload a custom .sql or .csv file to create a test table")
+    public ResponseEntity<ApiResponse<CustomTableResponse>> uploadCustomTable(
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        CustomTableResponse result = customTableService.uploadCustomTable(principal.getId(), file);
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+    @DeleteMapping("/custom-table")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Remove the current user's custom table")
+    public ResponseEntity<ApiResponse<Void>> removeCustomTable(@AuthenticationPrincipal UserPrincipal principal) {
+        customTableService.removeCustomTable(principal.getId());
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

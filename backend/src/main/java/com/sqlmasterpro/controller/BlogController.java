@@ -52,6 +52,13 @@ public class BlogController {
         return ResponseEntity.ok(ApiResponse.success(blogService.getAllBlogsForAdmin(pageable)));
     }
 
+    @GetMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('INSTRUCTOR')")
+    @Operation(summary = "Get a single blog by id for admin editing, including drafts")
+    public ResponseEntity<ApiResponse<Blog>> getBlogById(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(blogService.getBlogById(id)));
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('INSTRUCTOR')")
     @Operation(summary = "Create blog post")
@@ -65,5 +72,27 @@ public class BlogController {
     @Operation(summary = "Update blog post")
     public ResponseEntity<ApiResponse<Blog>> updateBlog(@PathVariable Long id, @RequestBody Blog blog) {
         return ResponseEntity.ok(ApiResponse.success("Blog updated", blogService.updateBlog(id, blog)));
+    }
+
+    @PutMapping("/{id}/publish")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('INSTRUCTOR')")
+    @Operation(summary = "Publish a blog post so it appears publicly")
+    public ResponseEntity<ApiResponse<Blog>> publishBlog(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success("Blog published", blogService.setPublished(id, true)));
+    }
+
+    @PutMapping("/{id}/unpublish")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('INSTRUCTOR')")
+    @Operation(summary = "Unpublish a blog post, reverting it to a draft")
+    public ResponseEntity<ApiResponse<Blog>> unpublishBlog(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success("Blog unpublished", blogService.setPublished(id, false)));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('INSTRUCTOR')")
+    @Operation(summary = "Delete blog post")
+    public ResponseEntity<ApiResponse<Void>> deleteBlog(@PathVariable Long id) {
+        blogService.deleteBlog(id);
+        return ResponseEntity.ok(ApiResponse.success("Blog deleted", null));
     }
 }

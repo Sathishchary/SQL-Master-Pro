@@ -48,6 +48,7 @@ public class SqlExecutionServiceImpl implements SqlExecutionService {
     @Override
     public SqlExecutionResponse executeQuery(String query, String databaseSchema, Long userId) {
         validateQuery(query);
+        validateSchemaOwnership(databaseSchema, userId);
 
         long startTime = System.currentTimeMillis();
         SqlExecutionResponse response = new SqlExecutionResponse();
@@ -147,6 +148,15 @@ public class SqlExecutionServiceImpl implements SqlExecutionService {
         }
     }
 
+    private void validateSchemaOwnership(String databaseSchema, Long userId) {
+        if (databaseSchema != null && databaseSchema.startsWith("custom_user_")) {
+            String ownerId = databaseSchema.substring("custom_user_".length());
+            if (userId == null || !ownerId.equals(String.valueOf(userId))) {
+                throw new BadRequestException("You do not have access to this custom table");
+            }
+        }
+    }
+
     private String sanitizeSchemaName(String name) {
         // Only allow alphanumeric and underscore
         return name.replaceAll("[^a-zA-Z0-9_]", "");
@@ -173,7 +183,11 @@ public class SqlExecutionServiceImpl implements SqlExecutionService {
         SqlExecution exec = executionRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Execution not found"));
         exec.setSaved(saved);
-        exec.setQueryName(name);
+        if (saved) {
+            exec.setQueryName((name == null || name.isBlank()) ? "Query " + id : name);
+        } else {
+            exec.setQueryName(name);
+        }
         return executionRepository.save(exec);
     }
 

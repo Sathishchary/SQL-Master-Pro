@@ -23,4 +23,10 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
     @Query(value = "SELECT b FROM Blog b LEFT JOIN FETCH b.author",
         countQuery = "SELECT COUNT(b) FROM Blog b")
     Page<Blog> findAllWithAuthor(Pageable pageable);
+
+    @Query("SELECT b FROM Blog b LEFT JOIN FETCH b.author WHERE b.id = :id")
+    Optional<Blog> findByIdWithAuthor(Long id);
+
+    @Query("SELECT b FROM Blog b LEFT JOIN FETCH b.author WHERE b.slug = :slug")
+    Optional<Blog> findBySlugWithAuthor(String slug);
 }

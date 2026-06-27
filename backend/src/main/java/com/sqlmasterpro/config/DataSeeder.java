@@ -5,6 +5,8 @@ import com.sqlmasterpro.model.entity.Lesson;
 import com.sqlmasterpro.model.enums.DifficultyLevel;
 import com.sqlmasterpro.repository.CourseRepository;
 import com.sqlmasterpro.repository.LessonRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -21,9 +23,15 @@ public class DataSeeder implements CommandLineRunner {
     private final CourseRepository courseRepository;
     private final LessonRepository lessonRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @Override
     @Transactional
     public void run(String... args) {
+        resyncSequence("courses_seq", "courses");
+        resyncSequence("lessons_seq", "lessons");
+
         if (courseRepository.count() > 0) {
             return;
         }
@@ -231,6 +239,22 @@ public class DataSeeder implements CommandLineRunner {
         );
 
         log.info("Seeding complete");
+    }
+
+    /**
+     * Realigns a Postgres sequence with the table's actual max id. Without this, rows inserted
+     * with an explicit id (e.g. a manual SQL import of curated course content) leave the sequence
+     * behind, so the next JPA-generated insert collides with an existing id and fails with a
+     * duplicate-key violation.
+     */
+    private void resyncSequence(String sequenceName, String tableName) {
+        try {
+            entityManager.createNativeQuery(
+                "SELECT setval('" + sequenceName + "', COALESCE((SELECT MAX(id) FROM " + tableName + "), 0) + 1, false)"
+            ).getSingleResult();
+        } catch (Exception ex) {
+            log.warn("Could not resync sequence {} for table {}: {}", sequenceName, tableName, ex.getMessage());
+        }
     }
 
     private void seedCourse(String title, String description, String shortDescription,
