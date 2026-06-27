@@ -8,13 +8,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, MatFormFieldModule,
-    MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatSnackBarModule],
+    MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatSnackBarModule,
+    MatCheckboxModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
@@ -59,11 +61,6 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {}
 
-  fillCredential(username: string, password: string): void {
-    this.loginForm.patchValue({ emailOrUsername: username, password });
-    this.loginForm.markAllAsTouched();
-  }
-
   onSubmit(): void {
     if (this.loginForm.invalid) return;
     this.isLoading = true;
@@ -80,11 +77,23 @@ export class LoginComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.isLoading = false;
-        this.snackBar.open(err.error?.message || 'Login failed. Please try again.', 'Close', {
-          duration: 5000, panelClass: 'error-snack'
+        const message = err.error?.message || 'Login failed. Please try again.';
+        const isUnverified = message.toLowerCase().includes('verify your email');
+        const ref = this.snackBar.open(message, isUnverified && emailOrUsername.includes('@') ? 'Resend Email' : 'Close', {
+          duration: isUnverified ? 8000 : 5000, panelClass: 'error-snack'
         });
+        if (isUnverified && emailOrUsername.includes('@')) {
+          ref.onAction().subscribe(() => this.resendVerification(emailOrUsername));
+        }
       },
       complete: () => { this.isLoading = false; }
+    });
+  }
+
+  private resendVerification(email: string): void {
+    this.authService.resendVerificationEmail(email).subscribe({
+      next: () => this.snackBar.open('Verification email sent! Check your inbox.', 'Close', { duration: 4000 }),
+      error: (err) => this.snackBar.open(err.error?.message || 'Failed to resend email', 'Close', { duration: 4000 })
     });
   }
 }

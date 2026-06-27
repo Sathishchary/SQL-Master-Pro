@@ -64,14 +64,17 @@
 /* ── PALETTE ── */
 .palette-col { @media (max-width: 900px) { display: none; } }
 .palette-card {
-  position: sticky; top: 132px;
+  position: sticky; top: 132px; max-height: calc(100vh - 152px);
   background: var(--surface); border-radius: 18px; padding: 20px;
   border: 1.5px solid var(--border); box-shadow: var(--shadow-sm);
+  display: flex; flex-direction: column;
 }
 .palette-title { font-size: 12px; font-weight: 800; text-transform: uppercase;
-  letter-spacing: 1px; color: var(--text-muted); margin-bottom: 14px;
+  letter-spacing: 1px; color: var(--text-muted); margin-bottom: 14px; flex-shrink: 0;
 }
-.palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 12px; }
+.palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 12px;
+  overflow-y: auto; padding-right: 2px; flex-shrink: 1;
+}
 .pq-btn {
   width: 100%; aspect-ratio: 1; border-radius: 8px; border: 1.5px solid var(--border);
   background: var(--surface); font-size: 12px; font-weight: 700; color: var(--text-secondary); cursor: pointer;
@@ -80,12 +83,12 @@
   &.active   { border-color: #764ba2; transform: scale(1.1); }
   &:hover:not(.answered) { border-color: #667eea; color: #667eea; }
 }
-.palette-legend { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-secondary); margin-bottom: 16px;
+.palette-legend { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-secondary); margin-bottom: 16px; flex-shrink: 0;
   .leg { width: 12px; height: 12px; border-radius: 4px; border: 1.5px solid var(--border); display: inline-block;
     &.answered { background: #667eea; border-color: #667eea; }
   }
 }
-.palette-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;
+.palette-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; flex-shrink: 0;
   .ps-item { border-radius: 10px; padding: 12px; text-align: center;
     .ps-num { display: block; font-size: 22px; font-weight: 900; }
     .ps-lbl { font-size: 11px; color: var(--text-muted); }
@@ -93,12 +96,21 @@
     &.gray  { background: var(--bg-secondary); .ps-num { color: var(--text-primary); } }
   }
 }
+.next-unanswered-btn {
+  width: 100%; height: 38px; border: 1.5px solid var(--border); border-radius: 12px; cursor: pointer;
+  background: var(--bg-secondary); color: var(--text-secondary);
+  font-size: 13px; font-weight: 700; font-family: inherit;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: all 0.2s; flex-shrink: 0; margin-bottom: 10px;
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  &:hover { border-color: #667eea; color: #667eea; }
+}
 .submit-side-btn {
   width: 100%; height: 44px; border: none; border-radius: 12px; cursor: pointer;
   background: linear-gradient(135deg, #667eea, #764ba2); color: white;
   font-size: 14px; font-weight: 700; font-family: inherit;
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: all 0.2s;
+  transition: all 0.2s; flex-shrink: 0;
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
   &:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(102,126,234,0.35); }
 }
@@ -109,6 +121,7 @@
   background: var(--surface); border-radius: 18px; padding: 28px;
   border: 2px solid var(--border); transition: border-color 0.2s, box-shadow 0.2s;
   box-shadow: var(--shadow-sm);
+  scroll-margin-top: 148px;
   &.answered { border-color: #667eea; }
   &:hover { box-shadow: 0 4px 16px rgba(102,126,234,0.1); }
 }
@@ -127,6 +140,14 @@
   &.advanced     { background: rgba(236,72,153,0.15); color: #f472b6; }
 }
 .q-topic { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+.qh-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.listen-icon-btn { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--border);
+  background: var(--surface); color: var(--text-secondary); display: flex; align-items: center;
+  justify-content: center; cursor: pointer; transition: all 0.15s; padding: 0;
+  mat-icon { font-size: 17px; width: 17px; height: 17px; }
+  &:hover { border-color: #667eea; color: #667eea; }
+  &.active { border-color: #667eea; background: rgba(102,126,234,0.1); color: #667eea; }
+}
 .answered-icon { color: #667eea; font-size: 22px; width: 22px; height: 22px; }
 .q-text { font-size: 17px; font-weight: 600; line-height: 1.65; color: var(--text-primary); margin: 0 0 22px; }
 

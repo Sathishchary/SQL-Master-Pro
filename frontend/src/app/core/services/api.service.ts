@@ -8,7 +8,8 @@ import {
   UserProgress, DashboardStats, PageResponse, PricingPlanDto,
   QuizResult, QuizAttempt, ChallengeSubmissionResult, SqlDatabase, PaymentOrder,
   RazorpayVerifyRequest, PaymentVerifyResult, UpiVerifyRequest,
-  AdminDashboardStats, AdminAnalytics, User
+  AdminDashboardStats, AdminAnalytics, User, CustomTableResponse,
+  Comment, CommentTargetType
 } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
@@ -96,6 +97,14 @@ export class ApiService {
   getDatabases(): Observable<ApiResponse<SqlDatabase[]>> {
     return this.http.get<ApiResponse<SqlDatabase[]>>(`${this.base}/sql/databases`);
   }
+  uploadCustomTable(file: File): Observable<ApiResponse<CustomTableResponse>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<ApiResponse<CustomTableResponse>>(`${this.base}/sql/custom-table/upload`, formData);
+  }
+  removeCustomTable(): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.base}/sql/custom-table`);
+  }
 
   // Certificates
   getMyCertificates(): Observable<ApiResponse<Certificate[]>> {
@@ -155,8 +164,14 @@ export class ApiService {
     const params = new HttpParams().set('page', page).set('size', size);
     return this.http.get<ApiResponse<PageResponse<User>>>(`${this.base}/admin/users`, { params });
   }
+  getAdminUserById(id: number): Observable<ApiResponse<User>> {
+    return this.http.get<ApiResponse<User>>(`${this.base}/admin/users/${id}`);
+  }
   createAdminUser(data: { username: string; email: string; password: string; firstName: string; lastName: string; role: string }): Observable<ApiResponse<User>> {
     return this.http.post<ApiResponse<User>>(`${this.base}/admin/users`, data);
+  }
+  updateAdminUser(id: number, data: { firstName: string; lastName: string; username: string; email: string; profilePicture?: string }): Observable<ApiResponse<User>> {
+    return this.http.put<ApiResponse<User>>(`${this.base}/admin/users/${id}`, data);
   }
   getAdminPayments(page = 0, size = 20): Observable<ApiResponse<PageResponse<Payment>>> {
     const params = new HttpParams().set('page', page).set('size', size);
@@ -180,16 +195,46 @@ export class ApiService {
   activateUser(id: number): Observable<ApiResponse<void>> {
     return this.http.put<ApiResponse<void>>(`${this.base}/admin/users/${id}/activate`, {});
   }
+  updateUserPlan(id: number, plan: string): Observable<ApiResponse<User>> {
+    return this.http.put<ApiResponse<User>>(`${this.base}/admin/users/${id}/plan`, { plan });
+  }
 
   // Admin Blog management
   getAdminBlogs(page = 0, size = 10): Observable<ApiResponse<PageResponse<Blog>>> {
     const params = new HttpParams().set('page', page).set('size', size).set('sort', 'createdAt,desc');
     return this.http.get<ApiResponse<PageResponse<Blog>>>(`${this.base}/blogs/admin/all`, { params });
   }
+  getAdminBlogById(id: number): Observable<ApiResponse<Blog>> {
+    return this.http.get<ApiResponse<Blog>>(`${this.base}/blogs/admin/${id}`);
+  }
   createBlog(data: Partial<Blog>): Observable<ApiResponse<Blog>> {
     return this.http.post<ApiResponse<Blog>>(`${this.base}/blogs`, data);
   }
   updateBlog(id: number, data: Partial<Blog>): Observable<ApiResponse<Blog>> {
     return this.http.put<ApiResponse<Blog>>(`${this.base}/blogs/${id}`, data);
+  }
+  deleteBlog(id: number): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.base}/blogs/${id}`);
+  }
+  publishBlog(id: number): Observable<ApiResponse<Blog>> {
+    return this.http.put<ApiResponse<Blog>>(`${this.base}/blogs/${id}/publish`, {});
+  }
+  unpublishBlog(id: number): Observable<ApiResponse<Blog>> {
+    return this.http.put<ApiResponse<Blog>>(`${this.base}/blogs/${id}/unpublish`, {});
+  }
+
+  // Comments (blog/course Q&A)
+  getComments(targetType: CommentTargetType, targetId: number): Observable<ApiResponse<Comment[]>> {
+    const params = new HttpParams().set('targetType', targetType).set('targetId', targetId);
+    return this.http.get<ApiResponse<Comment[]>>(`${this.base}/comments`, { params });
+  }
+  addComment(targetType: CommentTargetType, targetId: number, content: string): Observable<ApiResponse<Comment>> {
+    return this.http.post<ApiResponse<Comment>>(`${this.base}/comments`, { targetType, targetId, content });
+  }
+  replyToComment(id: number, content: string): Observable<ApiResponse<Comment>> {
+    return this.http.post<ApiResponse<Comment>>(`${this.base}/comments/${id}/reply`, { content });
+  }
+  deleteComment(id: number): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.base}/comments/${id}`);
   }
 }

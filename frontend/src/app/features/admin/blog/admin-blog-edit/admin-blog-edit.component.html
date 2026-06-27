@@ -1,0 +1,121 @@
+<div class="admin-blog-edit">
+  <div class="page-header">
+    <button mat-icon-button class="back-btn" (click)="cancel()" matTooltip="Back to Blog Management">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div>
+      <h1>{{ pageTitle }}</h1>
+      <p>Blog Management / {{ pageTitle }}</p>
+    </div>
+
+    @if (viewOnly && blog && tts.isSupported) {
+      <div class="listen-bar">
+        <button type="button" class="listen-btn" (click)="toggleListen()">
+          <mat-icon>{{ tts.isSpeaking() && !tts.isPaused() ? 'pause' : 'play_arrow' }}</mat-icon>
+          {{ tts.isSpeaking() && !tts.isPaused() ? 'Pause' : (tts.isPaused() ? 'Resume' : 'Listen to this article') }}
+        </button>
+        @if (tts.isSpeaking() || tts.isPaused()) {
+          <button type="button" class="stop-btn" (click)="tts.stop()" matTooltip="Stop">
+            <mat-icon>stop</mat-icon>
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  @if (viewOnly) {
+    @if (blog) {
+      <div class="blog-preview">
+        <div class="preview-meta">
+          <span class="meta-chip category">{{ blog.category || 'Uncategorized' }}</span>
+          <span class="meta-chip" [class.published]="blog.published">{{ blog.published ? 'Published' : 'Draft' }}</span>
+          @if (blog.featured) { <span class="meta-chip featured">Featured</span> }
+          <span class="meta-chip reading"><mat-icon>schedule</mat-icon> {{ blog.readingTimeMinutes }} min read</span>
+        </div>
+
+        <h1 class="preview-title">{{ blog.title }}</h1>
+        @if (blog.excerpt) { <p class="preview-excerpt">{{ blog.excerpt }}</p> }
+
+        @if (getTags(blog.tags).length) {
+          <div class="preview-tags">
+            @for (tag of getTags(blog.tags); track tag) {
+              <span class="tag-pill">{{ tag }}</span>
+            }
+          </div>
+        }
+
+        <div class="preview-content" [innerHTML]="blog.content"></div>
+      </div>
+    }
+
+    <div class="form-actions">
+      <button mat-button type="button" (click)="cancel()">Close</button>
+      <button mat-raised-button color="primary" type="button" [routerLink]="['/admin/blog/edit', blogId]">
+        <mat-icon>edit</mat-icon> Edit
+      </button>
+    </div>
+  } @else {
+    <form [formGroup]="blogForm" (ngSubmit)="saveBlog()" class="blog-form-grid">
+      <div class="main-col">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Title</mat-label>
+          <input matInput formControlName="title">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Excerpt</mat-label>
+          <textarea matInput formControlName="excerpt" rows="2"></textarea>
+        </mat-form-field>
+
+        <div class="content-header">
+          <label class="field-label">Content</label>
+          <button type="button" class="html-toggle-btn" (click)="toggleHtmlSource()">
+            <mat-icon>{{ htmlSourceMode ? 'visibility' : 'code' }}</mat-icon>
+            {{ htmlSourceMode ? 'Rich Text View' : 'Edit HTML Source' }}
+          </button>
+        </div>
+        @if (htmlSourceMode) {
+          <p class="content-hint">Paste a full HTML page or a snippet here, then click "Rich Text View" — full documents are automatically reduced to just the body content.</p>
+          <textarea class="html-source-editor" formControlName="content"
+            placeholder="Paste or write raw HTML here..." rows="14" spellcheck="false"></textarea>
+        } @else {
+          <quill-editor formControlName="content" [modules]="quillModules"
+            placeholder="Write your blog post content here..."
+            class="blog-editor"></quill-editor>
+        }
+      </div>
+
+      <div class="side-col">
+        <div class="side-card">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Category</mat-label>
+            <input matInput formControlName="category">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Slug (auto-generated if left blank)</mat-label>
+            <input matInput formControlName="slug">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Tags (comma separated)</mat-label>
+            <input matInput formControlName="tags">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Reading Time (minutes)</mat-label>
+            <input matInput type="number" formControlName="readingTimeMinutes">
+          </mat-form-field>
+          <div class="toggles">
+            <mat-slide-toggle formControlName="published" color="primary">Published</mat-slide-toggle>
+            <mat-slide-toggle formControlName="featured" color="accent">Featured</mat-slide-toggle>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button mat-button type="button" (click)="cancel()">Cancel</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="blogForm.invalid || saving">
+            {{ saving ? 'Saving...' : 'Save' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  }
+</div>

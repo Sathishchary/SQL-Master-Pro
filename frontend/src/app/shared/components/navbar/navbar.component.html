@@ -4,7 +4,7 @@
     <span class="brand-name">SQL Master Pro</span>
   </a>
 
-  @if (!isMobile && !isAdmin()) {
+  @if (!isAdmin()) {
   <nav class="nav-links">
     <a routerLink="/learn" routerLinkActive="active" mat-button>Learn</a>
     <a routerLink="/playground" routerLinkActive="active" mat-button>Playground</a>
@@ -18,6 +18,32 @@
   }
 
   <span class="spacer"></span>
+
+  @if (!isAdmin()) {
+    <button mat-icon-button class="mobile-menu-btn" [matMenuTriggerFor]="mobileMenu">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <mat-menu #mobileMenu="matMenu" xPosition="before">
+      <a mat-menu-item routerLink="/learn" routerLinkActive="active">
+        <mat-icon>menu_book</mat-icon> Learn
+      </a>
+      <a mat-menu-item routerLink="/playground" routerLinkActive="active">
+        <mat-icon>terminal</mat-icon> Playground
+      </a>
+      <a mat-menu-item routerLink="/quiz" routerLinkActive="active">
+        <mat-icon>quiz</mat-icon> Quiz
+      </a>
+      <a mat-menu-item routerLink="/challenges" routerLinkActive="active">
+        <mat-icon>emoji_events</mat-icon> Challenges
+      </a>
+      <a mat-menu-item routerLink="/blog" routerLinkActive="active">
+        <mat-icon>article</mat-icon> Blog
+      </a>
+      <a mat-menu-item routerLink="/pricing" routerLinkActive="active">
+        <mat-icon>star</mat-icon> Pricing
+      </a>
+    </mat-menu>
+  }
 
   <!-- Theme Dropdown -->
   <button mat-icon-button [matMenuTriggerFor]="themeMenu" [matTooltip]="'Current: ' + currentTheme" class="theme-btn">

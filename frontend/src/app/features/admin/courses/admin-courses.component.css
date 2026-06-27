@@ -1,32 +1,27 @@
 .admin-courses { padding: 24px; }
-.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
   h1 { font-size: 24px; font-weight: 800; margin: 0; color: var(--text-primary); }
   p { color: var(--text-secondary); margin: 4px 0 0; }
 }
-.course-form { background: var(--surface); border-radius: 16px; padding: 24px; margin-bottom: 24px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid var(--border);
-  h3 { font-size: 18px; font-weight: 700; margin: 0 0 20px; color: var(--text-primary); }
-}
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.full-width { width: 100%; }
-.field-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin: 4px 0 6px; }
-.course-editor { display: block; margin-bottom: 20px; border-radius: 10px; overflow: hidden;
-  border: 1px solid var(--border);
-  ::ng-deep .ql-toolbar.ql-snow { background: var(--bg-secondary); border: none;
-    border-bottom: 1px solid var(--border); padding: 10px 12px;
-  }
-  ::ng-deep .ql-formats { margin-right: 14px !important; }
-  ::ng-deep .ql-container.ql-snow { border: none; background: var(--surface); }
-  ::ng-deep .ql-editor { min-height: 160px; font-size: 14px; line-height: 1.6; }
-  ::ng-deep .ql-editor.ql-blank::before { color: var(--text-secondary); font-style: normal; }
-  &.read-only ::ng-deep .ql-toolbar.ql-snow { opacity: 0.5; pointer-events: none; }
-}
-.toggles { display: flex; gap: 24px; margin-bottom: 16px; }
-.form-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .courses-table-card { background: var(--surface); border-radius: 16px; overflow: hidden;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
 }
-.courses-table { width: 100%; }
+.table-scroll { width: 100%; overflow-x: auto; }
+.courses-table { width: 100%; min-width: 640px; }
+.actions-col { flex: 0 0 132px !important; width: 132px; text-align: center; justify-content: center; }
+.actions-row { display: flex; align-items: center; justify-content: center; gap: 2px; }
+.actions-menu-btn { display: none; }
+.delete-icon { color: #ef4444; }
+
+@media (max-width: 768px) {
+  .actions-col { flex: 0 0 56px !important; width: 56px; }
+  .actions-row { display: none; }
+  .actions-menu-btn { display: inline-flex; }
+}
+
+@media (max-width: 600px) {
+  .admin-courses { padding: 16px; }
+}
 .course-cell { display: flex; align-items: center; gap: 12px; padding: 4px 0; }
 .course-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center;
   justify-content: center; flex-shrink: 0;

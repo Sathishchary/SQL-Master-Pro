@@ -1,0 +1,36 @@
+.admin-course-edit { padding: 16px 20px 24px; }
+.page-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px;
+  h1 { font-size: 22px; font-weight: 800; margin: 0; color: var(--text-primary); }
+  p { color: var(--text-secondary); margin: 2px 0 0; font-size: 13px; }
+}
+.back-btn { margin-top: 2px; flex-shrink: 0; }
+
+.course-form-grid { display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start;
+  @media (max-width: 960px) { grid-template-columns: 1fr; }
+}
+
+.main-col, .side-card { background: var(--surface); border-radius: 14px; padding: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid var(--border); border-top: 3px solid #667eea;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.side-col { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 16px; }
+
+.full-width { width: 100%; }
+mat-form-field.full-width { margin-bottom: 4px; }
+.field-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin: 0 0 6px; }
+.course-editor { display: block; border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--border);
+  ::ng-deep .ql-toolbar.ql-snow { background: var(--bg-secondary); border: none;
+    border-bottom: 1px solid var(--border); padding: 10px 12px;
+  }
+  ::ng-deep .ql-formats { margin-right: 14px !important; }
+  ::ng-deep .ql-container.ql-snow { border: none; background: var(--surface); }
+  ::ng-deep .ql-editor { min-height: 420px; font-size: 14px; line-height: 1.7; }
+  ::ng-deep .ql-editor.ql-blank::before { color: var(--text-secondary); font-style: normal; }
+  &.read-only ::ng-deep .ql-toolbar.ql-snow { opacity: 0.5; pointer-events: none; }
+}
+.toggles { display: flex; gap: 20px; flex-wrap: wrap; }
+.form-actions { display: flex; gap: 8px; justify-content: flex-end;
+  background: var(--surface); border-radius: 14px; padding: 12px;
+  border: 1px solid var(--border);
+}

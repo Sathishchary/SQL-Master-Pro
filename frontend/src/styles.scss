@@ -366,6 +366,39 @@ input:-webkit-autofill:active {
   .theme-active { background: rgba(102,126,234,0.08) !important; color: #667eea !important; }
 }
 
+// ─── SweetAlert2 ─────────────────────────────────────────────────────────────
+.smp-swal-popup {
+  padding: 16px !important;
+  border-radius: 14px !important;
+}
+.smp-swal-icon {
+  width: 44px !important;
+  height: 44px !important;
+  margin: 4px auto 8px !important;
+  .swal2-icon-content { font-size: 24px !important; }
+}
+.smp-swal-title {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  padding: 0 4px !important;
+  margin: 0 0 4px !important;
+}
+.smp-swal-text {
+  font-size: 13px !important;
+  margin: 0 0 12px !important;
+  color: var(--text-secondary, #6b7280) !important;
+}
+.smp-swal-actions {
+  margin-top: 4px !important;
+  gap: 8px !important;
+}
+.smp-swal-btn {
+  font-size: 13px !important;
+  padding: 6px 18px !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
 // ─── Print ───────────────────────────────────────────────────────────────────
 @media print {
   .mat-toolbar, .navbar, footer, .no-print { display: none !important; }

@@ -26,6 +26,7 @@ export class AdminLayoutComponent {
   ];
 
   currentUser: Signal<AuthResponse | null>;
+  sidebarOpen = false;
 
   constructor(private authService: AuthService) {
     this.currentUser = this.authService.currentUser;
@@ -35,6 +36,14 @@ export class AdminLayoutComponent {
     const u = this.currentUser();
     if (!u) return '';
     return (u.firstName?.[0] || '') + (u.lastName?.[0] || '');
+  }
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  closeSidebar(): void {
+    this.sidebarOpen = false;
   }
 
   logout(): void {

@@ -54,6 +54,33 @@
   <div class="right-panel">
     <div class="form-card">
 
+      @if (registered) {
+        <div class="form-header">
+          <div class="form-icon success">
+            <mat-icon>mark_email_read</mat-icon>
+          </div>
+          <h2>Check your inbox</h2>
+          <p>We sent a verification link to <strong>{{ registeredEmail }}</strong></p>
+        </div>
+
+        <p class="hint-box">
+          <mat-icon>info</mat-icon>
+          Click the link in that email to activate your account, then sign in. It may take a minute to arrive — check spam too.
+        </p>
+
+        <p class="resend">
+          Didn't get an email?
+          <button type="button" class="link-btn" [disabled]="resending" (click)="resendVerification()">
+            {{ resending ? 'Sending…' : 'Resend it' }}
+          </button>
+        </p>
+
+        <p class="signin-row">
+          <a routerLink="/auth/login">
+            <mat-icon>arrow_back</mat-icon> Back to Login
+          </a>
+        </p>
+      } @else {
       <div class="form-header">
         <div class="form-icon"><mat-icon>person_add</mat-icon></div>
         <h2>Create Account</h2>
@@ -173,6 +200,7 @@
         Already have an account?
         <a routerLink="/auth/login">Sign in</a>
       </p>
+      }
     </div>
   </div>
 </div>

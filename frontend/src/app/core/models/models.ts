@@ -10,3 +10,4 @@ export * from './sql.model';
 export * from './dashboard.model';
 export * from './ui.model';
 export * from './interview.model';
+export * from './comment.model';

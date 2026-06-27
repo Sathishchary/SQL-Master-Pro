@@ -2,20 +2,18 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 
+const XP_PER_LEVEL = 100;
+
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, MatFormFieldModule,
-    MatInputModule, MatButtonModule, MatIconModule, MatChipsModule, MatSnackBarModule],
+  imports: [CommonModule, RouterModule, FormsModule, MatButtonModule, MatIconModule, MatSnackBarModule],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })
@@ -41,6 +39,11 @@ export class ProfileComponent implements OnInit {
   userInitials = computed(() => (this.firstName()[0] || '') + (this.lastName()[0] || ''));
   canSave = computed(() => this.firstName().trim().length > 0 && this.lastName().trim().length > 0);
 
+  level = computed(() => Math.floor(this.totalXp() / XP_PER_LEVEL) + 1);
+  xpIntoLevel = computed(() => this.totalXp() % XP_PER_LEVEL);
+  xpToNextLevel = computed(() => XP_PER_LEVEL - this.xpIntoLevel());
+  levelProgress = computed(() => this.xpIntoLevel());
+
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
@@ -56,7 +59,7 @@ export class ProfileComponent implements OnInit {
       this.firstName.set(current.firstName);
       this.lastName.set(current.lastName);
       this.profilePicture.set(current.profilePicture || '');
-      this.subscriptionPlan.set(current.subscriptionPlan);
+      this.subscriptionPlan.set(current.subscriptionPlan || '');
     }
 
     this.apiService.getMyProfile().subscribe({

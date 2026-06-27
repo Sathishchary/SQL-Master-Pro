@@ -37,3 +37,10 @@ export interface SampleQuery {
   description: string;
   query: string;
 }
+
+export interface CustomTableResponse {
+  schemaName: string;
+  tableName: string;
+  columns: string[];
+  rowCount: number;
+}

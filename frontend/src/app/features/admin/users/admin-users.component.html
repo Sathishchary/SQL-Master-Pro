@@ -2,26 +2,47 @@
   <div class="page-header">
     <div>
       <h1>User Management</h1>
-      <p>Manage all registered users</p>
+      <p>Manage all registered users, roles, and access.</p>
     </div>
     <div class="header-actions">
       <div class="search-box">
         <mat-icon>search</mat-icon>
         <input [(ngModel)]="searchQuery" (keyup.enter)="loadUsers()" placeholder="Search users...">
       </div>
-      <button mat-raised-button color="primary" routerLink="/admin/users/new">
+      <button class="btn-primary" routerLink="/admin/users/new">
         <mat-icon>person_add</mat-icon> Add User
       </button>
     </div>
   </div>
 
+  <!-- KPI strip -->
+  <div class="kpi-strip">
+    <div class="kpi kpi-a">
+      <div class="kpi-ic"><mat-icon>group</mat-icon></div>
+      <div><div class="kpi-num">{{ totalElements }}</div><div class="kpi-lab">Total users</div></div>
+    </div>
+    <div class="kpi kpi-b">
+      <div class="kpi-ic"><mat-icon>check_circle</mat-icon></div>
+      <div><div class="kpi-num">{{ activeCount }}</div><div class="kpi-lab">Active now</div></div>
+    </div>
+    <div class="kpi kpi-c">
+      <div class="kpi-ic"><mat-icon>bolt</mat-icon></div>
+      <div><div class="kpi-num">{{ totalXp }}</div><div class="kpi-lab">Total XP</div></div>
+    </div>
+    <div class="kpi kpi-d">
+      <div class="kpi-ic"><mat-icon>workspace_premium</mat-icon></div>
+      <div><div class="kpi-num">{{ enterpriseCount }}</div><div class="kpi-lab">Enterprise</div></div>
+    </div>
+  </div>
+
   <div class="users-table-card">
+    <div class="table-scroll">
     <table mat-table [dataSource]="users" class="users-table">
       <ng-container matColumnDef="user">
         <th mat-header-cell *matHeaderCellDef>User</th>
-        <td mat-cell *matCellDef="let u">
+        <td mat-cell *matCellDef="let u; let i = index">
           <div class="user-cell">
-            <div class="user-avatar">{{ u.firstName?.[0] }}{{ u.lastName?.[0] }}</div>
+            <div class="user-avatar" [style.background]="avatarGradient(i)">{{ u.firstName?.[0] }}{{ u.lastName?.[0] }}</div>
             <div>
               <div class="user-name">{{ u.firstName }} {{ u.lastName }}</div>
               <div class="user-email">{{ u.email }}</div>
@@ -29,35 +50,51 @@
           </div>
         </td>
       </ng-container>
-      <ng-container matColumnDef="username">
-        <th mat-header-cell *matHeaderCellDef>Username</th>
-        <td mat-cell *matCellDef="let u">{{ u.username }}</td>
-      </ng-container>
-      <ng-container matColumnDef="plan">
-        <th mat-header-cell *matHeaderCellDef>Plan</th>
+      <ng-container matColumnDef="role">
+        <th mat-header-cell *matHeaderCellDef>Role</th>
         <td mat-cell *matCellDef="let u">
-          <span class="plan-badge" [class]="u.subscriptionPlan?.toLowerCase()">{{ u.subscriptionPlan }}</span>
+          <span class="role-pill" [class.premium]="isPremiumPlan(u.subscriptionPlan)">
+            @if (isPremiumPlan(u.subscriptionPlan)) { <mat-icon>workspace_premium</mat-icon> }
+            {{ roleLabel(u.subscriptionPlan) }}
+          </span>
         </td>
       </ng-container>
       <ng-container matColumnDef="xp">
-        <th mat-header-cell *matHeaderCellDef>XP</th>
-        <td mat-cell *matCellDef="let u">{{ u.totalXp | number }}</td>
+        <th mat-header-cell *matHeaderCellDef class="col-center">XP</th>
+        <td mat-cell *matCellDef="let u" class="col-center">
+          <span class="xp-pill"><mat-icon>bolt</mat-icon>{{ u.totalXp | number }}</span>
+        </td>
       </ng-container>
       <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>Status</th>
-        <td mat-cell *matCellDef="let u">
-          <span class="status-badge" [class.active]="u.active" [class.inactive]="!u.active">
-            {{ u.active ? 'Active' : 'Inactive' }}
+        <th mat-header-cell *matHeaderCellDef class="col-center">Status</th>
+        <td mat-cell *matCellDef="let u" class="col-center">
+          <span class="status-pill" [class.inactive]="!u.active">
+            <span class="status-dot"></span>{{ u.active ? 'Active' : 'Inactive' }}
           </span>
         </td>
       </ng-container>
       <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let u">
-          <button mat-icon-button [matMenuTriggerFor]="userMenu">
+        <th mat-header-cell *matHeaderCellDef class="actions-col">Actions</th>
+        <td mat-cell *matCellDef="let u" class="actions-col">
+          <div class="actions-row">
+            <button class="icon-btn" matTooltip="Edit name & email" (click)="editUser(u)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            @if (!u.roles?.includes('ROLE_ADMIN')) {
+              <button class="icon-btn danger" [matMenuTriggerFor]="userMenu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+            }
+          </div>
+
+          <button class="icon-btn actions-menu-btn" [matMenuTriggerFor]="mobileMenu">
             <mat-icon>more_vert</mat-icon>
           </button>
+
           <mat-menu #userMenu="matMenu">
+            <button mat-menu-item [matMenuTriggerFor]="planMenu">
+              <mat-icon>workspace_premium</mat-icon> Change Plan
+            </button>
             @if (u.active) {
               <button mat-menu-item (click)="deactivateUser(u.id)">
                 <mat-icon>block</mat-icon> Deactivate
@@ -68,11 +105,36 @@
               </button>
             }
           </mat-menu>
+          <mat-menu #planMenu="matMenu">
+            @for (p of plans; track p) {
+              <button mat-menu-item [disabled]="p === u.subscriptionPlan" (click)="updateUserPlan(u.id, p)">
+                {{ p }}
+              </button>
+            }
+          </mat-menu>
+          <mat-menu #mobileMenu="matMenu">
+            <button mat-menu-item (click)="editUser(u)"><mat-icon>edit</mat-icon> Edit</button>
+            @if (!u.roles?.includes('ROLE_ADMIN')) {
+              <button mat-menu-item [matMenuTriggerFor]="planMenu">
+                <mat-icon>workspace_premium</mat-icon> Change Plan
+              </button>
+              @if (u.active) {
+                <button mat-menu-item (click)="deactivateUser(u.id)">
+                  <mat-icon>block</mat-icon> Deactivate
+                </button>
+              } @else {
+                <button mat-menu-item (click)="activateUser(u.id)">
+                  <mat-icon>check_circle</mat-icon> Activate
+                </button>
+              }
+            }
+          </mat-menu>
         </td>
       </ng-container>
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
+    </div>
 
     <mat-paginator [length]="totalElements" [pageSize]="10" [pageSizeOptions]="[10, 25, 50]"
       (page)="onPageChange($event)">

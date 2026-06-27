@@ -92,7 +92,7 @@
 
       <!-- Header -->
       <div class="form-header">
-        <div class="form-icon">🔐</div>
+        <div class="form-icon"><mat-icon>lock</mat-icon></div>
         <h2 class="form-title">Sign In</h2>
         <p class="form-sub">Access your learning dashboard</p>
       </div>
@@ -130,10 +130,10 @@
         </div>
 
         <div class="form-meta">
-          <label class="remember-wrap">
-            <input type="checkbox" [(ngModel)]="rememberMe" [ngModelOptions]="{standalone: true}">
-            <span>Remember me</span>
-          </label>
+          <mat-checkbox class="remember-wrap" color="primary"
+            [(ngModel)]="rememberMe" [ngModelOptions]="{standalone: true}">
+            Remember me
+          </mat-checkbox>
           <a routerLink="/auth/forgot-password" class="forgot-link">Forgot Password?</a>
         </div>
 
@@ -146,38 +146,6 @@
         </button>
 
       </form>
-
-      <!-- Test Credentials -->
-      <div class="creds-box">
-        <div class="creds-title">
-          <mat-icon>vpn_key</mat-icon>
-          Quick Access — Test Accounts
-        </div>
-        <div class="creds-grid">
-          <div class="cred-card admin" (click)="fillCredential('admin', 'admin123')">
-            <div class="cred-role">
-              <mat-icon>admin_panel_settings</mat-icon> Admin
-            </div>
-            <div class="cred-vals">
-              <code>admin</code>
-              <span class="cred-sep">/</span>
-              <code>admin123</code>
-            </div>
-            <div class="cred-use">Click to use →</div>
-          </div>
-          <div class="cred-card user" (click)="fillCredential('dataglance', 'test123')">
-            <div class="cred-role">
-              <mat-icon>person</mat-icon> User
-            </div>
-            <div class="cred-vals">
-              <code>dataglance</code>
-              <span class="cred-sep">/</span>
-              <code>test123</code>
-            </div>
-            <div class="cred-use">Click to use →</div>
-          </div>
-        </div>
-      </div>
 
       <p class="register-link">
         New to SQL Master Pro?

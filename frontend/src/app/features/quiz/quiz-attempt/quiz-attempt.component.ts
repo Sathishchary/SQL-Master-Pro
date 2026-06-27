@@ -5,15 +5,18 @@ import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription, interval } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
+import { TextToSpeechService } from '../../../core/services/text-to-speech.service';
 import { Question, Quiz } from '../../../core/models/models';
 import { getStaticQuiz, getStaticQuestions } from '../quiz-questions.data';
 
 @Component({
   selector: 'app-quiz-attempt',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, MatButtonModule, MatIconModule, MatSnackBarModule],
+  imports: [CommonModule, FormsModule, RouterModule, MatButtonModule, MatIconModule, MatSnackBarModule, MatTooltipModule],
   templateUrl: './quiz-attempt.component.html',
   styleUrls: ['./quiz-attempt.component.css']
 })
@@ -26,17 +29,43 @@ export class QuizAttemptComponent implements OnInit, OnDestroy {
   quizCompleted = false;
   result: any = null;
   activeQ = 0;
+  speakingQId: number | null = null;
   private timerSub?: Subscription;
 
   constructor(private route: ActivatedRoute,
-    private apiService: ApiService, private snackBar: MatSnackBar) {}
+    private apiService: ApiService, private snackBar: MatSnackBar, private confirmService: ConfirmService,
+    public tts: TextToSpeechService) {}
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.loadQuiz(id);
   }
 
-  ngOnDestroy(): void { this.timerSub?.unsubscribe(); }
+  ngOnDestroy(): void {
+    this.timerSub?.unsubscribe();
+    this.tts.stop();
+  }
+
+  speakQuestion(q: Question): void {
+    if (this.speakingQId === q.id && this.tts.isSpeaking()) {
+      this.tts.stop();
+      this.speakingQId = null;
+      return;
+    }
+
+    let text = q.questionText;
+    if (q.questionType === 'MCQ') {
+      const opts = this.getOptions(q);
+      text += '. ' + opts.map(o => `Option ${o.label}: ${o.text}`).join('. ');
+    } else if (q.questionType === 'TRUE_FALSE') {
+      text += '. True or false?';
+    }
+
+    this.speakingQId = q.id;
+    this.tts.speak(text, () => {
+      if (this.speakingQId === q.id) this.speakingQId = null;
+    });
+  }
 
   get answeredCount(): number { return Object.keys(this.answers).length; }
 
@@ -60,13 +89,23 @@ export class QuizAttemptComponent implements OnInit, OnDestroy {
   scrollTo(i: number): void {
     this.activeQ = i;
     const el = document.getElementById('q' + i);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  confirmSubmit(): void {
+  jumpToNextUnanswered(): void {
+    const idx = this.questions.findIndex(q => !this.answers[q.id]);
+    if (idx !== -1) this.scrollTo(idx);
+  }
+
+  async confirmSubmit(): Promise<void> {
     const unanswered = this.questions.length - this.answeredCount;
     if (unanswered > 0) {
-      const ok = window.confirm(`You have ${unanswered} unanswered question${unanswered > 1 ? 's' : ''}. Submit anyway?`);
+      const ok = await this.confirmService.confirm({
+        title: 'Submit quiz?',
+        text: `You have ${unanswered} unanswered question${unanswered > 1 ? 's' : ''}. Submit anyway?`,
+        confirmText: 'Submit',
+        danger: true
+      });
       if (!ok) return;
     }
     this.submitQuiz();

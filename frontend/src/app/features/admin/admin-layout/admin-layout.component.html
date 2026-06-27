@@ -1,14 +1,17 @@
 <div class="admin-layout">
   <!-- Sidebar -->
-  <nav class="admin-sidebar">
-    <div class="sidebar-brand">⚡ SQL Master Pro</div>
-    <div class="sidebar-label">ADMIN PANEL</div>
+  <nav class="admin-sidebar" [class.open]="sidebarOpen">
+    <div class="sidebar-brand">
+      <span class="brand-icon-box"><mat-icon>bolt</mat-icon></span>
+      <span>SQL Master Pro</span>
+    </div>
+    <p class="sidebar-label">Admin Panel</p>
     <ul class="sidebar-nav">
       @for (nav of navItems; track nav.path) {
         <li>
-          <a [routerLink]="nav.path" routerLinkActive="active" class="nav-item">
+          <a [routerLink]="nav.path" routerLinkActive="active" class="nav-item" (click)="closeSidebar()">
             <mat-icon>{{ nav.icon }}</mat-icon>
-            {{ nav.label }}
+            <span>{{ nav.label }}</span>
             @if (nav.badge) {
               <span class="nav-badge">{{ nav.badge }}</span>
             }
@@ -16,29 +19,42 @@
         </li>
       }
     </ul>
+
+    <button type="button" class="sidebar-foot" [matMenuTriggerFor]="profileMenu">
+      <div class="sf-avatar">{{ userInitials }}</div>
+      <div class="sf-who">
+        {{ currentUser()?.firstName }} {{ currentUser()?.lastName }}
+        <small>{{ currentUser()?.subscriptionPlan || 'Member' }}</small>
+      </div>
+      <mat-icon class="sf-chevron">unfold_more</mat-icon>
+    </button>
+    <mat-menu #profileMenu="matMenu" xPosition="after">
+      <div class="menu-header" mat-menu-item disabled>
+        <div class="menu-user-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</div>
+        <div class="menu-user-email">{{ currentUser()?.email }}</div>
+      </div>
+      <mat-divider></mat-divider>
+      <a mat-menu-item routerLink="/profile">
+        <mat-icon>account_circle</mat-icon> My Profile
+      </a>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon> Logout
+      </button>
+    </mat-menu>
   </nav>
+
+  <!-- Mobile backdrop -->
+  @if (sidebarOpen) {
+    <div class="sidebar-backdrop" (click)="closeSidebar()"></div>
+  }
 
   <!-- Main Content -->
   <div class="admin-main">
     <div class="admin-topbar">
-      <span class="spacer"></span>
-      <button mat-icon-button [matMenuTriggerFor]="profileMenu" class="avatar-btn">
-        <div class="avatar">{{ userInitials }}</div>
+      <button mat-icon-button class="menu-btn" (click)="toggleSidebar()">
+        <mat-icon>menu</mat-icon>
       </button>
-      <mat-menu #profileMenu="matMenu" xPosition="before">
-        <div class="menu-header" mat-menu-item disabled>
-          <div class="menu-user-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</div>
-          <div class="menu-user-email">{{ currentUser()?.email }}</div>
-        </div>
-        <mat-divider></mat-divider>
-        <a mat-menu-item routerLink="/profile">
-          <mat-icon>account_circle</mat-icon> My Profile
-        </a>
-        <mat-divider></mat-divider>
-        <button mat-menu-item (click)="logout()">
-          <mat-icon>logout</mat-icon> Logout
-        </button>
-      </mat-menu>
     </div>
     <div class="admin-content">
       <router-outlet></router-outlet>

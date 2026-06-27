@@ -47,6 +47,9 @@ export interface StatCard {
   label: string;
   value: number | string;
   color?: string;
+  sublabel?: string;
+  progress?: number;
+  route?: string;
 }
 
 export interface AnalyticsSummaryStat {

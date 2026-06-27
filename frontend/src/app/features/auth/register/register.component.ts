@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -20,6 +20,9 @@ export class RegisterComponent implements OnInit {
   showPwd = false;
   isLoading = false;
   submitted = false;
+  registered = false;
+  registeredEmail = '';
+  resending = false;
   focused = '';
   stars: { x: number; y: number; size: number; delay: number }[] = [];
 
@@ -34,7 +37,6 @@ export class RegisterComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router,
     private snackBar: MatSnackBar
   ) {
     this.registerForm = this.fb.group({
@@ -85,8 +87,8 @@ export class RegisterComponent implements OnInit {
     this.authService.register({ firstName, lastName, username, email, password }).subscribe({
       next: (res) => {
         if (res.success) {
-          this.snackBar.open('Account created! Welcome aboard 🎉', 'Close', { duration: 5000 });
-          this.router.navigate(['/dashboard']);
+          this.registeredEmail = email;
+          this.registered = true;
         }
       },
       error: (err) => {
@@ -96,6 +98,20 @@ export class RegisterComponent implements OnInit {
         });
       },
       complete: () => this.isLoading = false,
+    });
+  }
+
+  resendVerification(): void {
+    this.resending = true;
+    this.authService.resendVerificationEmail(this.registeredEmail).subscribe({
+      next: () => {
+        this.resending = false;
+        this.snackBar.open('Verification email resent!', 'Close', { duration: 3000 });
+      },
+      error: (err) => {
+        this.resending = false;
+        this.snackBar.open(err.error?.message || 'Failed to resend email', 'Close', { duration: 4000 });
+      }
     });
   }
 }

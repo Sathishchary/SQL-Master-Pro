@@ -1,0 +1,59 @@
+<div class="admin-course-edit">
+  <div class="page-header">
+    <button mat-icon-button class="back-btn" (click)="cancel()" matTooltip="Back to Course Management">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div>
+      <h1>{{ pageTitle }}</h1>
+      <p>Course Management / {{ pageTitle }}</p>
+    </div>
+  </div>
+
+  <form [formGroup]="courseForm" (ngSubmit)="saveCourse()" class="course-form-grid">
+    <div class="main-col">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Title</mat-label>
+        <input matInput formControlName="title">
+      </mat-form-field>
+
+      <label class="field-label">Description</label>
+      <quill-editor formControlName="description" [modules]="quillModules"
+        placeholder="Write a short description of what this course covers..."
+        [readOnly]="viewOnly" class="course-editor" [class.read-only]="viewOnly"></quill-editor>
+    </div>
+
+    <div class="side-col">
+      <div class="side-card">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Difficulty</mat-label>
+          <mat-select formControlName="difficulty">
+            <mat-option value="BEGINNER">Beginner</mat-option>
+            <mat-option value="INTERMEDIATE">Intermediate</mat-option>
+            <mat-option value="ADVANCED">Advanced</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Order Index</mat-label>
+          <input matInput type="number" formControlName="orderIndex">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Estimated Hours</mat-label>
+          <input matInput type="number" formControlName="estimatedHours">
+        </mat-form-field>
+        <div class="toggles">
+          <mat-slide-toggle formControlName="published" color="primary">Published</mat-slide-toggle>
+          <mat-slide-toggle formControlName="premium" color="accent">Premium</mat-slide-toggle>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button mat-button type="button" (click)="cancel()">{{ viewOnly ? 'Close' : 'Cancel' }}</button>
+        @if (!viewOnly) {
+          <button mat-raised-button color="primary" type="submit" [disabled]="courseForm.invalid || saving">
+            {{ saving ? 'Saving...' : 'Save' }}
+          </button>
+        }
+      </div>
+    </div>
+  </form>
+</div>

@@ -1,80 +1,132 @@
 <div class="profile-page">
-  <div class="profile-header">
-    <button mat-icon-button (click)="back()">
+  <div class="page-header">
+    <button class="back-btn" (click)="back()">
       <mat-icon>arrow_back</mat-icon>
     </button>
-    <h1>My Profile</h1>
+    <div>
+      <h1>My Profile</h1>
+      <p>Manage your account details and track your progress.</p>
+    </div>
   </div>
 
-  <div class="profile-card">
-    <div class="identity-row">
-      @if (profilePicture()) {
-        <img [src]="profilePicture()" class="avatar-img" alt="Profile picture">
-      } @else {
-        <div class="avatar-placeholder">{{ userInitials() }}</div>
-      }
-      <div class="identity-info">
-        <div class="identity-name">{{ firstName() }} {{ lastName() }}</div>
-        <div class="identity-meta">
-          <mat-chip-set>
-            <mat-chip>&#64;{{ username() }}</mat-chip>
-            <mat-chip class="plan-chip">{{ subscriptionPlan() }}</mat-chip>
-          </mat-chip-set>
+  <div class="profile-grid">
+    <!-- Sidebar -->
+    <div class="sidebar-card">
+      <div class="banner"></div>
+      <div class="avatar-wrap">
+        @if (profilePicture()) {
+          <img [src]="profilePicture()" class="avatar-img" alt="Profile picture">
+        } @else {
+          <div class="avatar-ph">{{ userInitials() }}</div>
+        }
+      </div>
+
+      <div class="identity">
+        <div class="id-name">{{ firstName() }} {{ lastName() }}</div>
+        <div class="id-username">&#64;{{ username() }}</div>
+        @if (subscriptionPlan()) {
+          <div class="plan-pill"><mat-icon>workspace_premium</mat-icon> {{ subscriptionPlan() }}</div>
+        }
+      </div>
+
+      <div class="level-block">
+        <div class="level-row">
+          <span class="level-label">Level {{ level() }}</span>
+          <span class="level-next">{{ xpToNextLevel() }} XP to Level {{ level() + 1 }}</span>
+        </div>
+        <div class="level-track"><div class="level-fill" [style.width.%]="levelProgress()"></div></div>
+        <div class="level-hint">Keep practicing to reach the next level!</div>
+      </div>
+
+      <div class="mini-stats">
+        <div class="mini-stat xp">
+          <mat-icon>bolt</mat-icon>
+          <div class="ms-val">{{ totalXp() }}</div>
+          <div class="ms-lbl">Total XP</div>
+        </div>
+        <div class="mini-stat streak">
+          <mat-icon>local_fire_department</mat-icon>
+          <div class="ms-val">{{ learningStreak() }}</div>
+          <div class="ms-lbl">Day Streak</div>
+        </div>
+        <div class="mini-stat joined">
+          <mat-icon>event</mat-icon>
+          <div class="ms-val">{{ joinedAt() ? (joinedAt() | date:'MMM d') : '—' }}</div>
+          <div class="ms-lbl">Joined {{ joinedAt() ? (joinedAt() | date:'yyyy') : '' }}</div>
         </div>
       </div>
     </div>
 
-    <div class="stats-row">
-      <div class="stat"><mat-icon>bolt</mat-icon> {{ totalXp() }} XP</div>
-      <div class="stat"><mat-icon>local_fire_department</mat-icon> {{ learningStreak() }} day streak</div>
-      @if (joinedAt()) {
-        <div class="stat"><mat-icon>event</mat-icon> Joined {{ joinedAt() | date:'mediumDate' }}</div>
-      }
-    </div>
+    <!-- Content -->
+    <div class="profile-content">
+      <div class="section-card">
+        <div class="section-head">
+          <span class="dot purple"></span>
+          <span class="section-title">Account</span>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Username</label>
+            <div class="input-shell locked">
+              <mat-icon>person</mat-icon>
+              <span class="shell-text">{{ username() }}</span>
+              <span class="lock-pill"><mat-icon>lock</mat-icon> Locked</span>
+            </div>
+            <div class="hint">Your unique handle.</div>
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <div class="input-shell locked">
+              <mat-icon>mail</mat-icon>
+              <span class="shell-text">{{ email() }}</span>
+              <span class="lock-pill"><mat-icon>lock</mat-icon> Locked</span>
+            </div>
+            <div class="hint">Used for sign-in and alerts.</div>
+          </div>
+        </div>
+      </div>
 
-    <div class="section-title">Account</div>
-    <div class="field-grid">
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sm">
-        <mat-label>Username</mat-label>
-        <input matInput [value]="username()" disabled>
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sm">
-        <mat-label>Email</mat-label>
-        <input matInput [value]="email()" disabled>
-      </mat-form-field>
-    </div>
+      <div class="section-card">
+        <div class="section-head">
+          <span class="dot orange"></span>
+          <span class="section-title">Personal Info</span>
+          <span class="section-sub">Visible on your profile</span>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>First name <span class="req">*</span></label>
+            <input class="text-input" [ngModel]="firstName()" (ngModelChange)="firstName.set($event)">
+          </div>
+          <div class="field">
+            <label>Last name <span class="req">*</span></label>
+            <input class="text-input" [ngModel]="lastName()" (ngModelChange)="lastName.set($event)">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Phone</label>
+            <input class="text-input" [ngModel]="phone()" (ngModelChange)="phone.set($event)"
+              placeholder="Add a phone number">
+          </div>
+          <div class="field">
+            <label>Profile picture URL</label>
+            <input class="text-input" [ngModel]="profilePicture()" (ngModelChange)="profilePicture.set($event)"
+              placeholder="https://...">
+          </div>
+        </div>
+        <div class="field full">
+          <label>Bio</label>
+          <textarea class="text-input" rows="3" [ngModel]="bio()" (ngModelChange)="bio.set($event)"
+            placeholder="Tell us about yourself"></textarea>
+        </div>
+      </div>
 
-    <div class="section-title">Personal Info</div>
-    <div class="field-grid">
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sm">
-        <mat-label>First Name</mat-label>
-        <input matInput [ngModel]="firstName()" (ngModelChange)="firstName.set($event)">
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sm">
-        <mat-label>Last Name</mat-label>
-        <input matInput [ngModel]="lastName()" (ngModelChange)="lastName.set($event)">
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sm">
-        <mat-label>Phone</mat-label>
-        <input matInput [ngModel]="phone()" (ngModelChange)="phone.set($event)">
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sm">
-        <mat-label>Profile Picture URL</mat-label>
-        <input matInput [ngModel]="profilePicture()" (ngModelChange)="profilePicture.set($event)"
-          placeholder="https://example.com/avatar.jpg">
-      </mat-form-field>
-    </div>
-
-    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sm full-width">
-      <mat-label>Bio</mat-label>
-      <textarea matInput rows="3" [ngModel]="bio()" (ngModelChange)="bio.set($event)"></textarea>
-    </mat-form-field>
-
-    <div class="form-actions">
-      <button mat-button type="button" (click)="back()">Cancel</button>
-      <button mat-raised-button color="primary" type="button" [disabled]="!canSave() || isSaving()" (click)="save()">
-        {{ isSaving() ? 'Saving...' : 'Save Changes' }}
-      </button>
+      <div class="form-actions">
+        <button mat-button type="button" (click)="back()">Cancel</button>
+        <button mat-raised-button color="primary" type="button" [disabled]="!canSave() || isSaving()" (click)="save()">
+          {{ isSaving() ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
     </div>
   </div>
 </div>

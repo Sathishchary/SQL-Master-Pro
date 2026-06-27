@@ -15,7 +15,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { ApiService } from '../../core/services/api.service';
-import { SqlExecutionResponse, SqlExecution, SqlDatabase } from '../../core/models/models';
+import { SqlExecutionResponse, SqlExecution, SqlDatabase, CustomTableResponse } from '../../core/models/models';
 
 @Component({
   selector: 'app-playground',
@@ -38,6 +38,8 @@ export class PlaygroundComponent implements OnInit {
   databases: SqlDatabase[] = [];
   savedLoading = false;
   historyLoading = false;
+  customTable: CustomTableResponse | null = null;
+  uploadingCustomTable = false;
   editorFullscreen = false;
   resultsFullscreen = false;
 
@@ -136,6 +138,15 @@ export class PlaygroundComponent implements OnInit {
     return this.sampleQueriesMap[this.selectedDatabase] || [];
   }
 
+  get displayDatabases(): SqlDatabase[] {
+    if (!this.customTable) return this.databases;
+    return [...this.databases, { id: this.customTable.schemaName, name: `My Upload: ${this.customTable.tableName}` }];
+  }
+
+  get isCustomDatabase(): boolean {
+    return !!this.customTable && this.selectedDatabase === this.customTable.schemaName;
+  }
+
   get filteredSaved(): SqlExecution[] {
     return this.savedQueries.filter(q => q.databaseName === this.selectedDatabase);
   }
@@ -227,6 +238,11 @@ export class PlaygroundComponent implements OnInit {
   loadQuery(query: string): void { this.sqlQuery = query; }
 
   onDatabaseChange(): void {
+    if (this.isCustomDatabase && this.customTable) {
+      this.currentDbTables = [this.customTable.tableName];
+      this.result = null;
+      return;
+    }
     this.currentDbTables = this.dbTableMap[this.selectedDatabase] || [];
     this.result = null;
     const samples = this.sampleQueriesMap[this.selectedDatabase];
@@ -264,6 +280,46 @@ export class PlaygroundComponent implements OnInit {
         this.loadSavedQueries();
       },
       error: () => this.snackBar.open('Failed to save query', 'Close', { duration: 2000 })
+    });
+  }
+
+  onCustomFileSelected(files: FileList | null): void {
+    const file = files?.[0];
+    if (!file) return;
+    this.uploadCustomTable(file);
+  }
+
+  uploadCustomTable(file: File): void {
+    this.uploadingCustomTable = true;
+    this.apiService.uploadCustomTable(file).subscribe({
+      next: (res) => {
+        this.uploadingCustomTable = false;
+        this.customTable = res.data;
+        this.selectedDatabase = res.data.schemaName;
+        this.currentDbTables = [res.data.tableName];
+        this.result = null;
+        this.sqlQuery = `SELECT * FROM ${res.data.tableName} LIMIT 10;`;
+        this.snackBar.open('Custom table created!', 'Close', { duration: 2000 });
+      },
+      error: (err) => {
+        this.uploadingCustomTable = false;
+        this.snackBar.open(err?.error?.message || 'Failed to upload file', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  removeCustomTable(): void {
+    this.apiService.removeCustomTable().subscribe({
+      next: () => {
+        const wasSelected = this.isCustomDatabase;
+        this.customTable = null;
+        if (wasSelected) {
+          this.selectedDatabase = 'employee_db';
+          this.onDatabaseChange();
+        }
+        this.snackBar.open('Custom table removed', 'Close', { duration: 2000 });
+      },
+      error: () => this.snackBar.open('Failed to remove custom table', 'Close', { duration: 2000 })
     });
   }
 

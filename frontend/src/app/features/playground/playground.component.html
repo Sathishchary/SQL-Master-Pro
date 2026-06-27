@@ -6,13 +6,32 @@
       <p>Write, execute, and learn SQL in real-time</p>
     </div>
     <div class="header-actions">
-      <mat-select [(ngModel)]="selectedDatabase" class="db-select" (ngModelChange)="onDatabaseChange()">
-        @for (db of databases; track db.id) {
-          <mat-option [value]="db.id">
-            {{ db.name }}
-          </mat-option>
-        }
-      </mat-select>
+      @if (customTable) {
+        <div class="custom-chip" matTooltip="{{ customTable.columns.length }} columns · {{ customTable.rowCount }} rows">
+          <mat-icon>table_chart</mat-icon>
+          <span>{{ customTable.tableName }}</span>
+          <button mat-icon-button (click)="removeCustomTable()" matTooltip="Remove custom table">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      } @else {
+        <input #customFileInput type="file" accept=".sql,.csv,.xlsx,.xls" style="display:none"
+          (change)="onCustomFileSelected($any($event.target).files)">
+        <button mat-stroked-button class="custom-upload-btn" (click)="customFileInput.click()" [disabled]="uploadingCustomTable"
+          matTooltip="Upload a .sql, .csv, .xlsx or .xls file to create your own test table">
+          <mat-icon>upload_file</mat-icon>
+          <span>{{ uploadingCustomTable ? 'Uploading...' : 'Custom Table' }}</span>
+        </button>
+      }
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="db-select-field">
+        <mat-select [(ngModel)]="selectedDatabase" class="db-select" (ngModelChange)="onDatabaseChange()">
+          @for (db of displayDatabases; track db.id) {
+            <mat-option [value]="db.id">
+              {{ db.name }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
       <button mat-icon-button (click)="toggleTheme()" matTooltip="Toggle theme">
         <mat-icon>{{ darkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
       </button>
@@ -38,25 +57,27 @@
               }
             </div>
           </mat-tab>
-          <mat-tab label="Saved">
-            <div class="saved-list">
-              @if (savedLoading) {
-                <div class="no-data"><mat-spinner diameter="28"></mat-spinner></div>
-              } @else if (!filteredSaved.length) {
-                <div class="no-data">
-                  <mat-icon>bookmark_border</mat-icon>
-                  <p>No saved queries yet for this database</p>
-                </div>
-              } @else {
-                @for (q of filteredSaved; track q.id) {
-                  <div class="sample-item" (click)="loadQuery(q.query)">
-                    <div class="sample-name">{{ q.queryName || 'Untitled' }}</div>
-                    <div class="sample-desc">{{ q.executedAt | date:'short' }}</div>
+          @if (!isCustomDatabase) {
+            <mat-tab label="Saved">
+              <div class="saved-list">
+                @if (savedLoading) {
+                  <div class="no-data"><mat-spinner diameter="28"></mat-spinner></div>
+                } @else if (!filteredSaved.length) {
+                  <div class="no-data">
+                    <mat-icon>bookmark_border</mat-icon>
+                    <p>No saved queries yet for this database</p>
                   </div>
+                } @else {
+                  @for (q of filteredSaved; track q.id) {
+                    <div class="sample-item" (click)="loadQuery(q.query)">
+                      <div class="sample-name">{{ q.queryName || 'Untitled' }}</div>
+                      <div class="sample-desc">{{ q.executedAt | date:'short' }}</div>
+                    </div>
+                  }
                 }
-              }
-            </div>
-          </mat-tab>
+              </div>
+            </mat-tab>
+          }
           <mat-tab label="History">
             <div class="history-list">
               @if (historyLoading) {
@@ -127,9 +148,11 @@ SELECT * FROM employees LIMIT 10;"
           <mat-icon>play_arrow</mat-icon>
           {{ isExecuting ? 'Executing...' : 'Run Query' }}
         </button>
-        <button mat-button (click)="saveQuery()" [disabled]="!result">
-          <mat-icon>bookmark</mat-icon> Save
-        </button>
+        @if (!isCustomDatabase) {
+          <button mat-button (click)="saveQuery()" [disabled]="!result">
+            <mat-icon>bookmark</mat-icon> Save
+          </button>
+        }
         <button mat-button (click)="exportCSV()" [disabled]="!result?.rows?.length">
           <mat-icon>download</mat-icon> Export CSV
         </button>

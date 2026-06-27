@@ -7,6 +7,21 @@
       </div>
       <h1 class="blog-title">{{ blog.title }}</h1>
       <p class="blog-excerpt">{{ blog.excerpt }}</p>
+
+      @if (tts.isSupported) {
+        <div class="listen-bar">
+          <button class="listen-btn" (click)="toggleListen()">
+            <mat-icon>{{ tts.isSpeaking() && !tts.isPaused() ? 'pause' : 'play_arrow' }}</mat-icon>
+            {{ tts.isSpeaking() && !tts.isPaused() ? 'Pause' : (tts.isPaused() ? 'Resume' : 'Listen to this article') }}
+          </button>
+          @if (tts.isSpeaking() || tts.isPaused()) {
+            <button class="stop-btn" (click)="tts.stop()" matTooltip="Stop">
+              <mat-icon>stop</mat-icon>
+            </button>
+          }
+        </div>
+      }
+
       @if (blog.author) {
         <div class="author-info">
           <div class="avatar">{{ blog.author.firstName[0] }}{{ blog.author.lastName[0] }}</div>
@@ -34,5 +49,9 @@
     <div class="blog-nav">
       <a routerLink="/blog" mat-stroked-button><mat-icon>arrow_back</mat-icon> Back to Blog</a>
     </div>
+
+    @if (blog.id) {
+      <app-comment-section targetType="BLOG" [targetId]="blog.id"></app-comment-section>
+    }
   </div>
 }

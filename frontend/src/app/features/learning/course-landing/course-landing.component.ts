@@ -10,12 +10,13 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApiService } from '../../../core/services/api.service';
 import { Course, Lesson } from '../../../core/models/models';
+import { CommentSectionComponent } from '../../../shared/components/comment-section/comment-section.component';
 
 @Component({
   selector: 'app-course-landing',
   standalone: true,
   imports: [CommonModule, RouterModule, MatButtonModule, MatIconModule, MatChipsModule,
-    MatCardModule, MatProgressBarModule, MatTooltipModule],
+    MatCardModule, MatProgressBarModule, MatTooltipModule, CommentSectionComponent],
   templateUrl: './course-landing.component.html',
   styleUrls: ['./course-landing.component.css']
 })

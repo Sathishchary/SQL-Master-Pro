@@ -61,6 +61,11 @@
               <span class="ps-lbl">Remaining</span>
             </div>
           </div>
+          @if (answeredCount < questions.length) {
+            <button class="next-unanswered-btn" (click)="jumpToNextUnanswered()">
+              <mat-icon>arrow_downward</mat-icon> Next Unanswered
+            </button>
+          }
           <button class="submit-side-btn" (click)="confirmSubmit()">
             <mat-icon>send</mat-icon> Submit Quiz
           </button>
@@ -84,9 +89,17 @@
                   <span class="q-topic">{{ q.topic }}</span>
                 }
               </div>
-              @if (answers[q.id]) {
-                <mat-icon class="answered-icon">check_circle</mat-icon>
-              }
+              <div class="qh-right">
+                @if (tts.isSupported) {
+                  <button type="button" class="listen-icon-btn" [class.active]="speakingQId === q.id"
+                    matTooltip="Listen to this question" (click)="speakQuestion(q)">
+                    <mat-icon>{{ speakingQId === q.id && tts.isSpeaking() ? 'stop_circle' : 'volume_up' }}</mat-icon>
+                  </button>
+                }
+                @if (answers[q.id]) {
+                  <mat-icon class="answered-icon">check_circle</mat-icon>
+                }
+              </div>
             </div>
 
             <!-- Question text -->

@@ -153,8 +153,25 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/users/admin-user-create/admin-user-create.component').then(m => m.AdminUserCreateComponent)
       },
       {
+        path: 'users/edit/:id',
+        loadComponent: () => import('./features/admin/users/admin-user-edit/admin-user-edit.component').then(m => m.AdminUserEditComponent)
+      },
+      {
         path: 'courses',
         loadComponent: () => import('./features/admin/courses/admin-courses.component').then(m => m.AdminCoursesComponent)
+      },
+      {
+        path: 'courses/new',
+        loadComponent: () => import('./features/admin/courses/admin-course-edit/admin-course-edit.component').then(m => m.AdminCourseEditComponent)
+      },
+      {
+        path: 'courses/edit/:id',
+        loadComponent: () => import('./features/admin/courses/admin-course-edit/admin-course-edit.component').then(m => m.AdminCourseEditComponent)
+      },
+      {
+        path: 'courses/view/:id',
+        loadComponent: () => import('./features/admin/courses/admin-course-edit/admin-course-edit.component').then(m => m.AdminCourseEditComponent),
+        data: { viewOnly: true }
       },
       {
         path: 'analytics',
@@ -162,7 +179,20 @@ export const routes: Routes = [
       },
       {
         path: 'blog',
-        loadComponent: () => import('./features/admin/blog/admin-blog.component').then(m => m.AdminBlogComponent)
+        loadComponent: () => import('./features/admin/blog/admin-blog-list/admin-blog-list.component').then(m => m.AdminBlogListComponent)
+      },
+      {
+        path: 'blog/new',
+        loadComponent: () => import('./features/admin/blog/admin-blog-edit/admin-blog-edit.component').then(m => m.AdminBlogEditComponent)
+      },
+      {
+        path: 'blog/edit/:id',
+        loadComponent: () => import('./features/admin/blog/admin-blog-edit/admin-blog-edit.component').then(m => m.AdminBlogEditComponent)
+      },
+      {
+        path: 'blog/view/:id',
+        loadComponent: () => import('./features/admin/blog/admin-blog-edit/admin-blog-edit.component').then(m => m.AdminBlogEditComponent),
+        data: { viewOnly: true }
       }
     ]
   },

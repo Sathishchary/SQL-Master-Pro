@@ -1,0 +1,78 @@
+<div class="admin-user-edit">
+  <div class="page-header">
+    <button type="button" class="back-btn" (click)="cancel()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div>
+      <h1>Edit User</h1>
+      <p>User Management / Edit User</p>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">Loading user...</div>
+  } @else {
+    <form [formGroup]="userForm" (ngSubmit)="save()" class="edit-card">
+      <div class="m-head">
+        <h2>Edit User</h2>
+        <p>Update profile and account details for this member.</p>
+      </div>
+
+      <div class="m-body">
+        <div class="avatar-row">
+          <div class="avatar-lg">
+            @if (previewUrl) {
+              <img [src]="previewUrl" alt="Profile picture" (error)="userForm.get('profilePicture')?.setValue('')">
+            } @else {
+              <span>{{ initials }}</span>
+            }
+          </div>
+          <div class="field full">
+            <label>Profile picture URL</label>
+            <div class="iw has">
+              <span class="lead"><mat-icon>image</mat-icon></span>
+              <input formControlName="profilePicture" placeholder="https://...">
+            </div>
+          </div>
+        </div>
+
+        <div class="fields">
+          <div class="field">
+            <label>First name <span class="req">*</span></label>
+            <input formControlName="firstName">
+            @if (error('firstName')) { <div class="err">{{ error('firstName') }}</div> }
+          </div>
+          <div class="field">
+            <label>Last name <span class="req">*</span></label>
+            <input formControlName="lastName">
+            @if (error('lastName')) { <div class="err">{{ error('lastName') }}</div> }
+          </div>
+          <div class="field full">
+            <label>Username <span class="req">*</span></label>
+            <div class="iw has">
+              <span class="lead"><mat-icon>person</mat-icon></span>
+              <input formControlName="username">
+            </div>
+            @if (error('username')) { <div class="err">{{ error('username') }}</div> }
+          </div>
+          <div class="field full">
+            <label>Email <span class="req">*</span></label>
+            <div class="iw has">
+              <span class="lead"><mat-icon>mail</mat-icon></span>
+              <input formControlName="email" type="email">
+            </div>
+            @if (error('email')) { <div class="err">{{ error('email') }}</div> }
+          </div>
+        </div>
+      </div>
+
+      <div class="m-foot">
+        <span class="req-note"><b>*</b> Required fields</span>
+        <button type="button" class="btn ghost" (click)="cancel()">Cancel</button>
+        <button type="submit" class="btn primary" [disabled]="saving">
+          <mat-icon>save</mat-icon> {{ saving ? 'Saving...' : 'Save changes' }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

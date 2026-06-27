@@ -1,0 +1,80 @@
+<div class="comment-section">
+  <div class="comment-section-header">
+    <mat-icon>forum</mat-icon>
+    <h2>Questions &amp; Discussion</h2>
+    <span class="comment-count">{{ comments.length }}</span>
+  </div>
+
+  @if (isLoggedIn) {
+    <div class="comment-composer">
+      <textarea [(ngModel)]="newComment" rows="3" placeholder="Ask a question about this content..."></textarea>
+      <button mat-raised-button color="primary" [disabled]="!newComment.trim() || posting" (click)="postComment()">
+        {{ posting ? 'Posting...' : 'Post Question' }}
+      </button>
+    </div>
+  } @else {
+    <div class="comment-login-hint">
+      <a routerLink="/auth/login">Log in</a> to ask a question or join the discussion.
+    </div>
+  }
+
+  @if (loading) {
+    <div class="comment-loading">Loading comments...</div>
+  } @else if (!comments.length) {
+    <div class="comment-empty">No questions yet — be the first to ask one.</div>
+  } @else {
+    <div class="comment-list">
+      @for (comment of comments; track comment.id) {
+        <div class="comment-item">
+          <div class="comment-avatar" [class.staff]="comment.staff">{{ initials(comment.userName) }}</div>
+          <div class="comment-body">
+            <div class="comment-meta">
+              <span class="comment-author">{{ comment.userName }}</span>
+              @if (comment.staff) { <span class="staff-badge">Instructor</span> }
+              <span class="comment-date">{{ comment.createdAt | date:'short' }}</span>
+            </div>
+            <p class="comment-text">{{ comment.content }}</p>
+            <div class="comment-actions">
+              @if (isStaff) {
+                <button class="link-btn" (click)="toggleReply(comment.id)">Reply</button>
+              }
+              @if (canDelete(comment)) {
+                <button class="link-btn danger" (click)="deleteComment(comment)">Delete</button>
+              }
+            </div>
+
+            @if (replyingTo === comment.id) {
+              <div class="reply-composer">
+                <textarea [(ngModel)]="replyDrafts[comment.id]" rows="2" placeholder="Write a reply..."></textarea>
+                <button mat-raised-button color="primary" (click)="postReply(comment.id)">Post Reply</button>
+              </div>
+            }
+
+            @if (comment.replies.length) {
+              <div class="reply-list">
+                @for (reply of comment.replies; track reply.id) {
+                  <div class="comment-item reply">
+                    <div class="comment-avatar" [class.staff]="reply.staff">{{ initials(reply.userName) }}</div>
+                    <div class="comment-body">
+                      <div class="comment-meta">
+                        <span class="comment-author">{{ reply.userName }}</span>
+                        @if (reply.staff) { <span class="staff-badge">Instructor</span> }
+                        <span class="comment-date">{{ reply.createdAt | date:'short' }}</span>
+                      </div>
+                      <p class="comment-text">{{ reply.content }}</p>
+                      @if (canDelete(reply)) {
+                        <div class="comment-actions">
+                          <button class="link-btn danger" (click)="deleteComment(reply)">Delete</button>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

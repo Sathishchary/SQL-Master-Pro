@@ -1,0 +1,94 @@
+.admin-user-edit {
+  --brand: #6c5ce7;
+  --brand-light: #8b7bff;
+  --brand-deep: #4b3fc4;
+  --brand-soft: #eeebff;
+  --flame: #ff6b4a;
+  --faint: #9499b7;
+  padding: 24px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.page-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 20px;
+  h1 { font-size: 22px; font-weight: 800; margin: 0; color: var(--text-primary); }
+  p { color: var(--text-secondary); margin: 2px 0 0; font-size: 13px; }
+}
+.back-btn { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--surface); display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary); cursor: pointer; flex-shrink: 0; margin-top: 2px; transition: all 0.15s;
+  &:hover { border-color: var(--brand); color: var(--brand); }
+}
+
+.loading-state { text-align: center; padding: 60px 0; color: var(--text-secondary); }
+
+.edit-card { background: var(--surface); border-radius: 22px; overflow: hidden;
+  box-shadow: 0 1px 2px rgba(20,22,50,0.04), 0 12px 36px -16px rgba(60,50,140,0.2);
+  border: 1px solid var(--border);
+}
+
+.m-head { padding: 24px 28px;
+  background: radial-gradient(120% 160% at 100% 0%, #ff6b4a33 0%, transparent 55%),
+    linear-gradient(135deg, var(--brand-deep), var(--brand));
+  color: #fff;
+  h2 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+  p { margin: 4px 0 0; font-size: 13.5px; color: #dcd8ff; }
+}
+
+.m-body { padding: 28px; }
+
+.avatar-row { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+.avatar-lg { width: 68px; height: 68px; border-radius: 18px; display: grid; place-items: center;
+  color: #fff; font-weight: 800; font-size: 24px; flex-shrink: 0; overflow: hidden;
+  background: linear-gradient(135deg, var(--brand), var(--brand-light));
+  box-shadow: 0 10px 22px -10px var(--brand);
+  img { width: 100%; height: 100%; object-fit: cover; }
+}
+
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+  @media (max-width: 480px) { grid-template-columns: 1fr; }
+}
+.full { grid-column: 1 / -1; }
+.field { display: flex; flex-direction: column; }
+.field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 7px; }
+.req { color: var(--flame); }
+.err { font-size: 11.5px; color: var(--flame); margin-top: 4px; }
+
+.iw { position: relative; display: flex; align-items: center;
+  .lead { position: absolute; left: 13px; color: var(--faint); display: grid; place-items: center; pointer-events: none;
+    mat-icon { font-size: 17px; width: 17px; height: 17px; }
+  }
+}
+input { width: 100%; font-family: inherit; font-size: 15px; color: var(--text-primary);
+  background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px;
+  padding: 13px 14px; transition: 0.16s; outline: none;
+  &::placeholder { color: var(--faint); }
+  &:hover { border-color: #c7c9e0; }
+  &:focus { border-color: var(--brand); background: var(--surface); box-shadow: 0 0 0 4px var(--brand-soft); }
+}
+.iw.has input { padding-left: 42px; }
+
+.m-foot { display: flex; align-items: center; gap: 12px; justify-content: flex-end;
+  padding: 18px 28px; border-top: 1px solid var(--border); background: var(--bg-secondary);
+  @media (max-width: 480px) { flex-wrap: wrap; }
+}
+.req-note { margin-right: auto; font-size: 12.5px; color: var(--faint);
+  b { color: var(--flame); }
+}
+.btn { font-family: inherit; font-size: 14px; font-weight: 700; border-radius: 12px; padding: 11px 20px;
+  cursor: pointer; border: 1px solid transparent; transition: 0.18s; display: inline-flex; align-items: center; gap: 8px;
+  mat-icon { font-size: 17px; width: 17px; height: 17px; }
+}
+.btn.primary { background: linear-gradient(135deg, var(--brand), var(--brand-light)); color: #fff;
+  box-shadow: 0 10px 22px -10px var(--brand);
+  &:hover { transform: translateY(-1px); box-shadow: 0 14px 26px -10px var(--brand); }
+  &:disabled { opacity: 0.7; cursor: default; transform: none; }
+}
+.btn.ghost { background: var(--surface); border-color: var(--border); color: var(--text-secondary);
+  &:hover { color: var(--text-primary); border-color: #c7c9e0; }
+}
+
+@media (max-width: 600px) {
+  .admin-user-edit { padding: 16px; }
+  .m-head, .m-body, .m-foot { padding-left: 18px; padding-right: 18px; }
+}

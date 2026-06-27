@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -8,18 +8,20 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApiService } from '../../../core/services/api.service';
+import { TextToSpeechService } from '../../../core/services/text-to-speech.service';
 import { ApiResponse, Lesson, Course } from '../../../core/models/models';
 
 @Component({
   selector: 'app-lesson-detail',
   standalone: true,
   imports: [CommonModule, RouterModule, MatCardModule, MatButtonModule, MatIconModule,
-    MatChipsModule, MatProgressBarModule, MatSnackBarModule, MatDividerModule],
+    MatChipsModule, MatProgressBarModule, MatSnackBarModule, MatDividerModule, MatTooltipModule],
   templateUrl: './lesson-detail.component.html',
   styleUrls: ['./lesson-detail.component.css']
 })
-export class LessonDetailComponent implements OnInit {
+export class LessonDetailComponent implements OnInit, OnDestroy {
   lesson: Lesson | null = null;
   course: Course | null = null;
   lessons: (Lesson & { completed?: boolean })[] = [];
@@ -30,7 +32,7 @@ export class LessonDetailComponent implements OnInit {
   nextLessonId: number | null = null;
 
   constructor(private route: ActivatedRoute, private router: Router,
-    private apiService: ApiService, private snackBar: MatSnackBar) {}
+    private apiService: ApiService, private snackBar: MatSnackBar, public tts: TextToSpeechService) {}
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
@@ -40,9 +42,26 @@ export class LessonDetailComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.tts.stop();
+  }
+
+  toggleListen(): void {
+    if (!this.lesson) return;
+    if (this.tts.isSpeaking() && !this.tts.isPaused()) {
+      this.tts.pause();
+    } else if (this.tts.isPaused()) {
+      this.tts.resume();
+    } else {
+      const text = `${this.lesson.title}. ${this.lesson.content}`;
+      this.tts.speak(text);
+    }
+  }
+
   private loadLesson(lessonId: number): void {
     this.completed = false;
     this.lesson = null;
+    this.tts.stop();
 
     this.apiService.getCourse(this.courseId).subscribe({
       next: (res) => { if (res.success) this.course = res.data; }

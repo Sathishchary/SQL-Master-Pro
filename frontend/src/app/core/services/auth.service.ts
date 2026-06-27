@@ -24,9 +24,11 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) {}
 
   register(data: { username: string; email: string; password: string; firstName: string; lastName: string }): Observable<ApiResponse<AuthResponse>> {
-    return this.http.post<ApiResponse<AuthResponse>>(`${environment.apiUrl}/auth/register`, data).pipe(
-      tap(res => { if (res.success) this.storeAuth(res.data, true); })
-    );
+    return this.http.post<ApiResponse<AuthResponse>>(`${environment.apiUrl}/auth/register`, data);
+  }
+
+  resendVerificationEmail(email: string): Observable<ApiResponse<void>> {
+    return this.http.post<ApiResponse<void>>(`${environment.apiUrl}/auth/resend-verification?email=${encodeURIComponent(email)}`, {});
   }
 
   login(emailOrUsername: string, password: string, rememberMe = false): Observable<ApiResponse<AuthResponse>> {
@@ -100,8 +102,8 @@ export class AuthService {
     other.removeItem(this.TOKEN_KEY);
     other.removeItem(this.REFRESH_KEY);
     other.removeItem(this.USER_KEY);
-    storage.setItem(this.TOKEN_KEY, auth.accessToken);
-    storage.setItem(this.REFRESH_KEY, auth.refreshToken);
+    storage.setItem(this.TOKEN_KEY, auth.accessToken || '');
+    storage.setItem(this.REFRESH_KEY, auth.refreshToken || '');
     storage.setItem(this.USER_KEY, JSON.stringify(auth));
     this._currentUser.set(auth);
   }

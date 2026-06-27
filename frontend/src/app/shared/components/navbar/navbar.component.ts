@@ -28,7 +28,6 @@ export class NavbarComponent {
     { value: 'dark',  label: 'Dark',  icon: 'dark_mode' },
   ];
 
-  isMobile = window.innerWidth < 768;
   scrolled = false;
 
   get themeIcon(): string {
